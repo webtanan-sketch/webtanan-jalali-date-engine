@@ -9,6 +9,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "jest --runInBand",
     "test:ci": "npm run typecheck && npm test && npm run build"
