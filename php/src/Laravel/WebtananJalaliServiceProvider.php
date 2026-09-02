@@ -11,11 +11,29 @@ class WebtananJalaliServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->mergeConfigFrom(
+            __DIR__ . '/../../config/webtanan-jalali.php',
+            'webtanan-jalali'
+        );
+
         $this->app->singleton('webtanan.jalali', static fn () => new JalaliDate());
     }
 
     public function boot(): void
     {
-        // محل انتشار config، view و asset در نسخه‌های بعدی.
+        $this->loadViewsFrom(
+            __DIR__ . '/../../resources/views',
+            'webtanan-jalali'
+        );
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__ . '/../../config/webtanan-jalali.php' => config_path('webtanan-jalali.php'),
+            ], 'webtanan-jalali-config');
+
+            $this->publishes([
+                __DIR__ . '/../../resources/views' => resource_path('views/vendor/webtanan-jalali'),
+            ], 'webtanan-jalali-views');
+        }
     }
 }
