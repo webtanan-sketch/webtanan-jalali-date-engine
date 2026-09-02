@@ -3,32 +3,193 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>دموی Webtanan Jalali Date Engine</title>
-  <link rel="stylesheet" href="../src/ui/webtanan-jalali.css">
+  <title>Webtanan Jalali Date Engine — Demo</title>
+  <link rel="stylesheet" href="../dist/browser/webtanan-jalali.css">
   <style>
-    body{margin:0;background:#f3f5f7;font-family:Tahoma,Arial,sans-serif;color:#172033}
-    main{min-height:100vh;display:grid;place-items:center;padding:24px}
-    .demo-card{width:min(100%,520px)}
-    h1{font-size:20px;margin:0 0 8px}.hint{font-size:13px;color:#667085;margin:0 0 18px}
+    :root{font-family:Tahoma,Arial,sans-serif;color:#172033;background:#eef1f5}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh}
+    main{width:min(1180px,100%);margin:auto;padding:24px;display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);gap:20px;align-items:start}
+    .panel{background:#fff;border:1px solid #d7dce3;border-radius:14px;padding:18px;box-shadow:0 10px 30px rgba(23,32,51,.06)}
+    .calendar-panel{position:sticky;top:18px}
+    h1{font-size:21px;margin:0 0 7px}h2{font-size:15px;margin:0 0 12px}.hint{font-size:12px;line-height:1.8;color:#667085;margin:0}
+    .controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+    label{display:grid;gap:6px;font-size:12px;font-weight:800;color:#475467}
+    select,input,button{font:inherit}
+    select,input{width:100%;height:40px;border:1px solid #cfd6df;border-radius:8px;background:#fff;padding:0 10px;color:#172033;outline:none}
+    select:focus,input:focus{border-color:#667085;box-shadow:0 0 0 2px rgba(102,112,133,.12)}
+    button.action{height:40px;border:0;border-radius:8px;background:#172033;color:#fff;font-weight:800;cursor:pointer;padding:0 14px}
+    #calendarHost{margin-top:18px}
+    .result{margin-top:14px;border:1px solid #e1e5ea;background:#f8fafc;border-radius:10px;padding:12px;min-height:48px;font-size:13px;line-height:1.9;white-space:pre-wrap}
+    .year-row{display:grid;grid-template-columns:1fr auto;gap:8px}.year-row button{min-width:110px}
+    .status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.status{border:1px solid #e1e5ea;border-radius:8px;padding:10px;font-size:12px}.status strong{display:block;margin-bottom:4px}
+    code{direction:ltr;display:inline-block;background:#eef2f6;border-radius:5px;padding:2px 5px;font-family:monospace}
+    @media(max-width:820px){main{grid-template-columns:1fr}.calendar-panel{position:static}.controls{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <main>
-    <section class="demo-card">
-      <h1>موتور تاریخ شمسی وب‌تنان</h1>
-      <p class="hint">نمونه رابط صنعتی RTL — نسخه 0.5.0</p>
-      <div class="webtanan-calendar">
-        <header class="webtanan-calendar__header">
-          <button class="webtanan-calendar__nav" type="button" aria-label="ماه قبل">‹</button>
-          <strong class="webtanan-calendar__title">شهریور ۱۴۰۵</strong>
-          <button class="webtanan-calendar__nav" type="button" aria-label="ماه بعد">›</button>
-        </header>
-        <div class="webtanan-calendar__weekdays">
-          <span>شنبه</span><span>یکشنبه</span><span>دوشنبه</span><span>سه‌شنبه</span><span>چهارشنبه</span><span>پنجشنبه</span><span>جمعه</span>
-        </div>
-        <div class="webtanan-calendar__days" aria-label="روزهای ماه"></div>
+    <section class="panel calendar-panel">
+      <h1>Webtanan Jalali Date Engine</h1>
+      <p class="hint">دموی تعاملی نسخه 0.11 — بعد از اجرای <code>npm run build</code> این فایل را باز کنید.</p>
+      <div id="calendarHost"></div>
+      <div id="selectionResult" class="result">یک تاریخ انتخاب کنید.</div>
+    </section>
+
+    <section class="panel">
+      <h2>تنظیمات رابط</h2>
+      <div class="controls">
+        <label>تم حرفه‌ای
+          <select id="themeSelect"></select>
+        </label>
+        <label>حالت انتخاب
+          <select id="modeSelect">
+            <option value="single">تک تاریخ</option>
+            <option value="range">بازه تاریخ</option>
+            <option value="multiple">چند تاریخ</option>
+          </select>
+        </label>
+        <label>رنگ Accent سفارشی
+          <input id="accentInput" type="color" value="#17365d">
+        </label>
+        <label>سال نمونه دیتاست تعطیلات
+          <select id="holidayYearSelect">
+            <option value="1405">۱۴۰۵</option>
+            <option value="1404">۱۴۰۴</option>
+          </select>
+        </label>
+      </div>
+
+      <h2 style="margin-top:24px">بررسی سال و کبیسه</h2>
+      <p class="hint">هر سال از الگوریتم اصلی محاسبه می‌شود؛ لیست دستی سال‌های کبیسه وجود ندارد. مثال: ۱۳۶۰.</p>
+      <div class="year-row" style="margin-top:10px">
+        <input id="yearInput" inputmode="numeric" value="1360" aria-label="سال شمسی">
+        <button id="checkYear" class="action" type="button">بررسی سال</button>
+      </div>
+      <div id="yearResult" class="result"></div>
+
+      <h2 style="margin-top:24px">وضعیت نسخه</h2>
+      <div class="status-grid">
+        <div class="status"><strong>دیتاست داخلی</strong>۱۴۰۴ و ۱۴۰۵</div>
+        <div class="status"><strong>Theme</strong>۴ تم + CSS Variables</div>
+        <div class="status"><strong>انتخاب</strong>Single / Range / Multiple</div>
+        <div class="status"><strong>تقویم</strong>سال ۱ تا ۳۱۷۷</div>
       </div>
     </section>
   </main>
+
+  <script src="../dist/browser/webtanan-jalali.js"></script>
+  <script>
+    const API = window.WebtananJalali;
+    if (!API) throw new Error('Browser bundle پیدا نشد. ابتدا npm run build را اجرا کنید.');
+
+    const themeSelect = document.getElementById('themeSelect');
+    const modeSelect = document.getElementById('modeSelect');
+    const accentInput = document.getElementById('accentInput');
+    const holidayYearSelect = document.getElementById('holidayYearSelect');
+    const host = document.getElementById('calendarHost');
+    const selectionResult = document.getElementById('selectionResult');
+    const yearInput = document.getElementById('yearInput');
+    const yearResult = document.getElementById('yearResult');
+
+    for (const theme of API.ThemeManager.list()) {
+      const option = document.createElement('option');
+      option.value = theme.name;
+      option.textContent = `${theme.titleFa} — ${theme.titleEn}`;
+      themeSelect.appendChild(option);
+    }
+
+    let picker = null;
+    let calendarRoot = null;
+
+    function buildPicker() {
+      picker?.close();
+      host.replaceChildren();
+      const mode = modeSelect.value;
+      const selectedYear = Number(holidayYearSelect.value);
+      const theme = themeSelect.value || API.ThemeManager.defaultTheme;
+
+      picker = new API.WebtananDatePicker({
+        theme,
+        range: mode === 'range',
+        multiple: mode === 'multiple',
+        time: true,
+        minuteStep: 15,
+      });
+
+      const holidayEngine = new API.HolidayEngine();
+      const dataset = API.getIranOfficialHolidayDataset(selectedYear);
+      if (dataset) holidayEngine.load(dataset, selectedYear);
+      picker.setHolidayEngine(holidayEngine);
+
+      const statusEngine = new API.DayStatusEngine();
+      if (selectedYear === 1405) {
+        statusEngine.set('1405/06/11', 'meeting');
+        statusEngine.set('1405/06/12', 'work');
+      }
+      picker.setDayStatusEngine(statusEngine);
+
+      const initialDate = `${selectedYear}/06/11`;
+      if (mode === 'single') picker.setDate(initialDate);
+      if (mode === 'range') picker.setRange(`${selectedYear}/06/08`, `${selectedYear}/06/14`);
+      if (mode === 'multiple') picker.setMultipleDates([
+        `${selectedYear}/06/08`,
+        `${selectedYear}/06/11`,
+        `${selectedYear}/06/14`,
+      ]);
+      picker.setTime(10, 30);
+      picker.addEvent({ date: initialDate, title: 'جلسه برنامه‌ریزی', type: 'meeting' });
+
+      calendarRoot = picker.open(host);
+      applyAccent();
+      renderSelection();
+    }
+
+    function renderSelection(detail) {
+      const value = detail || {
+        jalali: picker?.getDate(),
+        range: picker?.getRange(),
+        selectedDates: picker?.getMultipleDates(),
+        time: picker?.getFormattedTime(),
+      };
+      selectionResult.textContent = JSON.stringify(value, null, 2);
+    }
+
+    function applyAccent() {
+      if (!calendarRoot) return;
+      API.ThemeManager.applyCustomVariables(calendarRoot, {
+        accent: accentInput.value,
+        'accent-contrast': '#ffffff',
+      });
+    }
+
+    function renderYearInfo() {
+      try {
+        const year = Number(String(yearInput.value).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+        const info = API.getJalaliYearInfo(year);
+        yearResult.textContent = [
+          `سال: ${info.year}`,
+          `وضعیت: ${info.leapStatusFa}`,
+          `تعداد روز سال: ${info.daysInYear}`,
+          `تعداد روز اسفند: ${info.esfandDays}`,
+          `اول فروردین میلادی: ${info.farvardin1GregorianISO}`,
+          `آخر اسفند میلادی: ${info.lastDayGregorianISO}`,
+        ].join('\n');
+      } catch (error) {
+        yearResult.textContent = error instanceof Error ? error.message : String(error);
+      }
+    }
+
+    host.addEventListener('webtanan-date-change', event => renderSelection(event.detail));
+    themeSelect.addEventListener('change', () => picker?.setTheme(themeSelect.value));
+    modeSelect.addEventListener('change', buildPicker);
+    holidayYearSelect.addEventListener('change', buildPicker);
+    accentInput.addEventListener('input', applyAccent);
+    document.getElementById('checkYear').addEventListener('click', renderYearInfo);
+    yearInput.addEventListener('keydown', event => { if (event.key === 'Enter') renderYearInfo(); });
+
+    buildPicker();
+    renderYearInfo();
+  </script>
 </body>
 </html>
