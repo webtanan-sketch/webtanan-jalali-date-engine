@@ -1,10 +1,16 @@
 export type JalaliDateValue = { year: number; month: number; day: number };
 export type GregorianDateValue = { year: number; month: number; day: number };
 
-const PERSIAN_EPOCH = 1948320.5;
-const GREGORIAN_EPOCH = 1721425.5;
+const JALALI_BREAKS = [
+  -61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181,
+  1210, 1635, 2060, 2097, 2192, 2262, 2324, 2394, 2456, 3178,
+] as const;
 
-const mod = (a: number, b: number): number => a - b * Math.floor(a / b);
+const MIN_JALALI_YEAR = 1;
+const MAX_JALALI_YEAR = JALALI_BREAKS[JALALI_BREAKS.length - 1] - 1;
+
+const div = (a: number, b: number): number => Math.trunc(a / b);
+const mod = (a: number, b: number): number => a - div(a, b) * b;
 
 const isGregorianLeapYear = (year: number): boolean =>
   year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
@@ -21,93 +27,144 @@ const isValidGregorian = (date: GregorianDateValue): boolean => {
   return max > 0 && date.day >= 1 && date.day <= max;
 };
 
-const gregorianToJd = ({ year, month, day }: GregorianDateValue): number => {
-  const adjustment = month <= 2 ? 0 : isGregorianLeapYear(year) ? -1 : -2;
-  return (
-    GREGORIAN_EPOCH -
-    1 +
-    365 * (year - 1) +
-    Math.floor((year - 1) / 4) -
-    Math.floor((year - 1) / 100) +
-    Math.floor((year - 1) / 400) +
-    Math.floor((367 * month - 362) / 12 + adjustment + day)
-  );
-};
+interface JalaliCalculation {
+  leap: number;
+  gregorianYear: number;
+  marchDay: number;
+}
 
-const jdToGregorian = (jd: number): GregorianDateValue => {
-  const wjd = Math.floor(jd - 0.5) + 0.5;
-  const depoch = wjd - GREGORIAN_EPOCH;
-  const quadricent = Math.floor(depoch / 146097);
-  const dqc = mod(depoch, 146097);
-  const cent = Math.floor(dqc / 36524);
-  const dcent = mod(dqc, 36524);
-  const quad = Math.floor(dcent / 1461);
-  const dquad = mod(dcent, 1461);
-  const yindex = Math.floor(dquad / 365);
-
-  let year = quadricent * 400 + cent * 100 + quad * 4 + yindex;
-  if (!(cent === 4 || yindex === 4)) year += 1;
-
-  const yearday = wjd - gregorianToJd({ year, month: 1, day: 1 });
-  const leapadj = wjd < gregorianToJd({ year, month: 3, day: 1 }) ? 0 : isGregorianLeapYear(year) ? 1 : 2;
-  const month = Math.floor(((yearday + leapadj) * 12 + 373) / 367);
-  const day = Math.floor(wjd - gregorianToJd({ year, month, day: 1 }) + 1);
-
-  return { year, month, day };
-};
-
-const jalaliToJd = ({ year, month, day }: JalaliDateValue): number => {
-  const epbase = year - (year >= 0 ? 474 : 473);
-  const epyear = 474 + mod(epbase, 2820);
-  const mdays = month <= 7 ? (month - 1) * 31 : (month - 1) * 30 + 6;
-
-  return (
-    day +
-    mdays +
-    Math.floor((epyear * 682 - 110) / 2816) +
-    (epyear - 1) * 365 +
-    Math.floor(epbase / 2820) * 1029983 +
-    (PERSIAN_EPOCH - 1)
-  );
-};
-
-const jdToJalali = (jd: number): JalaliDateValue => {
-  const normalized = Math.floor(jd) + 0.5;
-  const depoch = normalized - jalaliToJd({ year: 475, month: 1, day: 1 });
-  const cycle = Math.floor(depoch / 1029983);
-  const cyear = mod(depoch, 1029983);
-
-  let ycycle: number;
-  if (cyear === 1029982) {
-    ycycle = 2820;
-  } else {
-    const aux1 = Math.floor(cyear / 366);
-    const aux2 = mod(cyear, 366);
-    ycycle = Math.floor((2134 * aux1 + 2816 * aux2 + 2815) / 1028522) + aux1 + 1;
+/**
+ * محاسبه سال جلالی با نقاط شکست تقویم رسمی ایران.
+ * leap === 0 یعنی سال جلالی کبیسه است.
+ */
+const jalaliCalculation = (year: number): JalaliCalculation => {
+  const firstBreak = JALALI_BREAKS[0];
+  const lastBreak = JALALI_BREAKS[JALALI_BREAKS.length - 1];
+  if (!Number.isInteger(year) || year < firstBreak || year >= lastBreak) {
+    throw new RangeError(`سال شمسی خارج از محدوده پشتیبانی است: ${year}`);
   }
 
-  let year = ycycle + 2820 * cycle + 474;
-  if (year <= 0) year -= 1;
+  const gregorianYear = year + 621;
+  let leapJalali = -14;
+  let previousBreak = firstBreak;
+  let jump = 0;
 
-  const yday = Math.floor(normalized - jalaliToJd({ year, month: 1, day: 1 }) + 1);
-  const month = yday <= 186 ? Math.ceil(yday / 31) : Math.ceil((yday - 6) / 30);
-  const day = Math.floor(normalized - jalaliToJd({ year, month, day: 1 }) + 1);
+  for (let index = 1; index < JALALI_BREAKS.length; index += 1) {
+    const currentBreak = JALALI_BREAKS[index];
+    jump = currentBreak - previousBreak;
+    if (year < currentBreak) break;
+    leapJalali += div(jump, 33) * 8 + div(mod(jump, 33), 4);
+    previousBreak = currentBreak;
+  }
 
+  let offset = year - previousBreak;
+  leapJalali += div(offset, 33) * 8 + div(mod(offset, 33) + 3, 4);
+  if (mod(jump, 33) === 4 && jump - offset === 4) leapJalali += 1;
+
+  const leapGregorian =
+    div(gregorianYear, 4) - div((div(gregorianYear, 100) + 1) * 3, 4) - 150;
+  const marchDay = 20 + leapJalali - leapGregorian;
+
+  if (jump - offset < 6) {
+    offset = offset - jump + div(jump + 4, 33) * 33;
+  }
+
+  let leap = mod(mod(offset + 1, 33) - 1, 4);
+  if (leap === -1) leap = 4;
+
+  return { leap, gregorianYear, marchDay };
+};
+
+const gregorianToDayNumber = ({ year, month, day }: GregorianDateValue): number => {
+  let value =
+    div((year + div(month - 8, 6) + 100100) * 1461, 4) +
+    div(153 * mod(month + 9, 12) + 2, 5) +
+    day -
+    34840408;
+  value =
+    value - div(div(year + 100100 + div(month - 8, 6), 100) * 3, 4) + 752;
+  return value;
+};
+
+const dayNumberToGregorian = (dayNumber: number): GregorianDateValue => {
+  let value = 4 * dayNumber + 139361631;
+  value =
+    value + div(div(4 * dayNumber + 183187720, 146097) * 3, 4) * 4 - 3908;
+  const intermediate = div(mod(value, 1461), 4) * 5 + 308;
+  const day = div(mod(intermediate, 153), 5) + 1;
+  const month = mod(div(intermediate, 153), 12) + 1;
+  const year = div(value, 1461) - 100100 + div(8 - month, 6);
   return { year, month, day };
+};
+
+const jalaliToDayNumber = ({ year, month, day }: JalaliDateValue): number => {
+  const calculation = jalaliCalculation(year);
+  return (
+    gregorianToDayNumber({
+      year: calculation.gregorianYear,
+      month: 3,
+      day: calculation.marchDay,
+    }) +
+    (month - 1) * 31 -
+    div(month, 7) * (month - 7) +
+    day -
+    1
+  );
+};
+
+const dayNumberToJalali = (dayNumber: number): JalaliDateValue => {
+  const gregorian = dayNumberToGregorian(dayNumber);
+  let year = gregorian.year - 621;
+  let calculation = jalaliCalculation(year);
+  const firstFarvardin = gregorianToDayNumber({
+    year: gregorian.year,
+    month: 3,
+    day: calculation.marchDay,
+  });
+  let offset = dayNumber - firstFarvardin;
+
+  if (offset >= 0) {
+    if (offset <= 185) {
+      return {
+        year,
+        month: 1 + div(offset, 31),
+        day: mod(offset, 31) + 1,
+      };
+    }
+    offset -= 186;
+  } else {
+    year -= 1;
+    offset += 179;
+    if (calculation.leap === 1) offset += 1;
+    calculation = jalaliCalculation(year);
+  }
+
+  return {
+    year,
+    month: 7 + div(offset, 30),
+    day: mod(offset, 30) + 1,
+  };
 };
 
 const daysInJalaliMonth = (year: number, month: number): number => {
-  if (month < 1 || month > 12) return 0;
+  if (!Number.isInteger(year) || year < MIN_JALALI_YEAR || year > MAX_JALALI_YEAR) return 0;
+  if (!Number.isInteger(month) || month < 1 || month > 12) return 0;
   if (month <= 6) return 31;
   if (month <= 11) return 30;
-  return JalaliConverter.isLeapYear(year) ? 30 : 29;
+  return jalaliCalculation(year).leap === 0 ? 30 : 29;
 };
 
 export const JalaliConverter = {
+  supportedYears: {
+    min: MIN_JALALI_YEAR,
+    max: MAX_JALALI_YEAR,
+  } as const,
+
   isLeapYear(year: number): boolean {
-    const start = jalaliToJd({ year, month: 1, day: 1 });
-    const next = jalaliToJd({ year: year + 1, month: 1, day: 1 });
-    return next - start === 366;
+    if (!Number.isInteger(year) || year < MIN_JALALI_YEAR || year > MAX_JALALI_YEAR) {
+      throw new RangeError(`سال شمسی خارج از محدوده پشتیبانی است: ${year}`);
+    }
+    return jalaliCalculation(year).leap === 0;
   },
 
   daysInMonth(year: number, month: number): number {
@@ -131,7 +188,7 @@ export const JalaliConverter = {
 
   toGregorian(date: JalaliDateValue): GregorianDateValue {
     if (!this.isValid(date)) throw new RangeError('تاریخ شمسی نامعتبر است.');
-    return jdToGregorian(jalaliToJd(date));
+    return dayNumberToGregorian(jalaliToDayNumber(date));
   },
 
   toGregorianISO(date: JalaliDateValue): string {
@@ -140,10 +197,12 @@ export const JalaliConverter = {
   },
 
   toJalali(date: GregorianDateValue): JalaliDateValue {
-    if (!isValidGregorian(date)) {
-      throw new RangeError('تاریخ میلادی نامعتبر است.');
+    if (!isValidGregorian(date)) throw new RangeError('تاریخ میلادی نامعتبر است.');
+    const result = dayNumberToJalali(gregorianToDayNumber(date));
+    if (result.year < MIN_JALALI_YEAR || result.year > MAX_JALALI_YEAR) {
+      throw new RangeError('تاریخ میلادی خارج از محدوده تقویم شمسی پشتیبانی‌شده است.');
     }
-    return jdToJalali(gregorianToJd(date));
+    return result;
   },
 
   fromGregorianDate(date: Date): JalaliDateValue {
