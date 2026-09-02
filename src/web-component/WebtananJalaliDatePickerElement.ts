@@ -7,7 +7,16 @@ const HTMLElementBase: typeof HTMLElement =
 
 export class WebtananJalaliDatePickerElement extends HTMLElementBase {
   static get observedAttributes(): string[] {
-    return ['value', 'time', 'min-date', 'max-date', 'persian-digits'];
+    return [
+      'value',
+      'time',
+      'range',
+      'multiple',
+      'disabled-dates',
+      'min-date',
+      'max-date',
+      'persian-digits',
+    ];
   }
 
   private picker: WebtananDatePicker | null = null;
@@ -33,7 +42,13 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
   }
 
   get value(): string {
-    return this.picker?.getDateTime() ?? '';
+    if (!this.picker) return '';
+    if (this.boolAttribute('multiple', false)) return this.picker.getMultipleDates().join(',');
+    if (this.boolAttribute('range', false)) {
+      const range = this.picker.getRange();
+      return range ? `${range.start}..${range.end}` : '';
+    }
+    return this.picker.getDateTime() ?? '';
   }
 
   set value(value: string) {
@@ -51,10 +66,20 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
     return value === '' || value === 'true' || value === '1';
   }
 
+  private disabledDatesFromAttribute(): string[] {
+    return (this.getAttribute('disabled-dates') ?? '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean);
+  }
+
   private optionsFromAttributes(): Partial<WebtananDatePickerOptions> {
     return {
       time: this.boolAttribute('time', false),
+      range: this.boolAttribute('range', false),
+      multiple: this.boolAttribute('multiple', false),
       persianDigits: this.boolAttribute('persian-digits', true),
+      disabledDates: this.disabledDatesFromAttribute(),
       minDate: this.getAttribute('min-date') ?? undefined,
       maxDate: this.getAttribute('max-date') ?? undefined,
     };
@@ -70,11 +95,18 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
 
     const raw = this.getAttribute('value')?.trim();
     if (raw) {
-      const [date, time] = raw.split(/\s+/, 2);
-      this.picker.setDate(date);
-      if (time && this.boolAttribute('time', false)) {
-        const parts = time.split(':').map(Number);
-        this.picker.setTime(parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0);
+      if (this.boolAttribute('multiple', false)) {
+        this.picker.setMultipleDates(raw.split(',').map((value) => value.trim()).filter(Boolean));
+      } else if (this.boolAttribute('range', false)) {
+        const [start, end] = raw.split('..', 2).map((value) => value.trim());
+        if (start && end) this.picker.setRange(start, end);
+      } else {
+        const [date, time] = raw.split(/\s+/, 2);
+        this.picker.setDate(date);
+        if (time && this.boolAttribute('time', false)) {
+          const parts = time.split(':').map(Number);
+          this.picker.setTime(parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0);
+        }
       }
     }
 
@@ -83,19 +115,22 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
   }
 
   private forwardChange = (event: CustomEvent): void => {
+    let value = event.detail?.dateTime ?? event.detail?.jalali ?? '';
+    if (this.boolAttribute('multiple', false)) {
+      value = Array.isArray(event.detail?.selectedDates) ? event.detail.selectedDates.join(',') : '';
+    } else if (this.boolAttribute('range', false)) {
+      const range = event.detail?.range;
+      value = range ? `${range.start}..${range.end}` : '';
+    }
+
     this.reflectingValue = true;
     try {
-      this.setAttribute('value', event.detail?.dateTime ?? event.detail?.jalali ?? '');
+      this.setAttribute('value', value);
     } finally {
       this.reflectingValue = false;
     }
 
-    this.dispatchEvent(
-      new CustomEvent('change', {
-        bubbles: true,
-        detail: event.detail,
-      }),
-    );
+    this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: event.detail }));
   };
 }
 
