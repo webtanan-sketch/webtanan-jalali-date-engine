@@ -5,7 +5,7 @@ const official = (date: string, title: string, id: string) => ({
   title,
   id,
   type: 'official' as const,
-  source: 'movable' as const,
+  source: 'annual-dataset' as const,
 });
 
 export const IRAN_OFFICIAL_HOLIDAYS_1404: AnnualHolidayDatasetPayload = {
