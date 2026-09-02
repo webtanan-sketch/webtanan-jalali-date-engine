@@ -1,22 +1,33 @@
-export interface JalaliDateValue {
-  year: number;
-  month: number;
-  day: number;
-}
+import { JalaliConverter, type GregorianDateValue, type JalaliDateValue } from './converter';
+
+export type { JalaliDateValue, GregorianDateValue };
 
 export class JalaliCore {
   static isValid(date: JalaliDateValue): boolean {
-    if (date.month < 1 || date.month > 12) return false;
-    if (date.day < 1 || date.day > 31) return false;
-    return true;
+    return JalaliConverter.isValid(date);
   }
 
-  static format(date: JalaliDateValue): string {
-    return `${date.year}/${String(date.month).padStart(2,'0')}/${String(date.day).padStart(2,'0')}`;
+  static isLeapYear(year: number): boolean {
+    return JalaliConverter.isLeapYear(year);
   }
 
-  static toGregorian(date: JalaliDateValue): string {
-    // Conversion engine will be completed in v0.2.0
-    return `${date.year}-${String(date.month).padStart(2,'0')}-${String(date.day).padStart(2,'0')}`;
+  static daysInMonth(year: number, month: number): number {
+    return JalaliConverter.daysInMonth(year, month);
+  }
+
+  static format(date: JalaliDateValue, separator = '/'): string {
+    return JalaliConverter.format(date, separator);
+  }
+
+  static toGregorian(date: JalaliDateValue): GregorianDateValue {
+    return JalaliConverter.toGregorian(date);
+  }
+
+  static toGregorianISO(date: JalaliDateValue): string {
+    return JalaliConverter.toGregorianISO(date);
+  }
+
+  static toJalali(date: GregorianDateValue): JalaliDateValue {
+    return JalaliConverter.toJalali(date);
   }
 }
