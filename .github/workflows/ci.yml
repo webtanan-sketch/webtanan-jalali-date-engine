@@ -44,7 +44,7 @@ jobs:
         run: composer validate --strict
 
       - name: بررسی Syntax فایل‌های PHP
-        run: find php/src php/tests -name '*.php' -print0 | xargs -0 -n1 php -l
+        run: find php/src php/tests php/config -name '*.php' -print0 | xargs -0 -n1 php -l
 
       - name: اجرای تست‌های تبدیل PHP
         run: php php/tests/run.php
