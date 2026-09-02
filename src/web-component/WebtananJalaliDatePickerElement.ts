@@ -12,6 +12,7 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
 
   private picker: WebtananDatePicker | null = null;
   private connected = false;
+  private reflectingValue = false;
 
   connectedCallback(): void {
     if (typeof document === 'undefined') return;
@@ -22,12 +23,13 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
 
   disconnectedCallback(): void {
     this.connected = false;
+    this.removeEventListener('webtanan-date-change', this.forwardChange as EventListener);
     this.picker?.close();
     this.picker = null;
   }
 
   attributeChangedCallback(): void {
-    if (this.connected) this.initialize();
+    if (this.connected && !this.reflectingValue) this.initialize();
   }
 
   get value(): string {
@@ -61,6 +63,7 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
   private initialize(): void {
     if (typeof document === 'undefined') return;
 
+    this.removeEventListener('webtanan-date-change', this.forwardChange as EventListener);
     this.picker?.close();
     this.replaceChildren();
     this.picker = new WebtananDatePicker(this.optionsFromAttributes());
@@ -76,11 +79,17 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
     }
 
     this.picker.open(this);
-    this.addEventListener('webtanan-date-change', this.forwardChange as EventListener, { once: true });
+    this.addEventListener('webtanan-date-change', this.forwardChange as EventListener);
   }
 
   private forwardChange = (event: CustomEvent): void => {
-    this.setAttribute('value', event.detail?.dateTime ?? event.detail?.jalali ?? '');
+    this.reflectingValue = true;
+    try {
+      this.setAttribute('value', event.detail?.dateTime ?? event.detail?.jalali ?? '');
+    } finally {
+      this.reflectingValue = false;
+    }
+
     this.dispatchEvent(
       new CustomEvent('change', {
         bubbles: true,
