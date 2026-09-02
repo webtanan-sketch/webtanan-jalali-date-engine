@@ -32,6 +32,12 @@ export type {
   AnnualHolidayDatasetPayload,
   HolidayDatasetSource,
 } from './enterprise/holidays/AnnualHolidayDataset';
+export {
+  IRAN_OFFICIAL_HOLIDAYS_1404,
+  IRAN_OFFICIAL_HOLIDAYS_1405,
+  IRAN_OFFICIAL_DATASET_YEARS,
+  getIranOfficialHolidayDataset,
+} from './enterprise/holidays/IranOfficialHolidayDatasets';
 export { DayStatusEngine } from './enterprise/DayStatusEngine';
 export { WorkflowTimeline } from './enterprise/WorkflowTimeline';
 
@@ -53,6 +59,9 @@ export type {
 export { JsonRepository } from './storage/JsonRepository';
 export type { StoredEnvelope, JsonRepositoryOptions } from './storage/JsonRepository';
 export { DatePickerPersistence } from './storage/DatePickerPersistence';
+
+export { ThemeManager, WEBTANAN_THEME_PRESETS } from './theme/ThemeManager';
+export type { WebtananThemeName, WebtananThemePreset } from './theme/ThemeManager';
 
 export { PersianDigits, toPersianDigits, toEnglishDigits } from './utils/PersianDigits';
 export { DateValidator } from './utils/DateValidator';
