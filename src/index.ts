@@ -1,6 +1,8 @@
 export { JalaliCore } from './core/jalali-core';
 export type { JalaliDateValue, GregorianDateValue } from './core/jalali-core';
 export { JalaliConverter } from './core/converter';
+export { JalaliYearEngine, getJalaliYearInfo } from './core/JalaliYearInfo';
+export type { JalaliYearInfo } from './core/JalaliYearInfo';
 
 export { KeyboardDateNavigator } from './accessibility/KeyboardDateNavigator';
 export type { CalendarNavigationKey } from './accessibility/KeyboardDateNavigator';
