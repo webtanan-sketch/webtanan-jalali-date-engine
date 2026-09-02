@@ -1,5 +1,6 @@
 export { JalaliCore } from './core/jalali-core';
-export type { JalaliDateValue } from './core/jalali-core';
+export type { JalaliDateValue, GregorianDateValue } from './core/jalali-core';
+export { JalaliConverter } from './core/converter';
 
 export { JalaliCalendar } from './calendar/JalaliCalendar';
 export { CalendarRenderer } from './calendar/CalendarRenderer';
@@ -17,7 +18,12 @@ export { CalendarEventBridge } from './integrations/CalendarEventBridge';
 export { SalesWorkflowAdapter } from './integrations/SalesWorkflowAdapter';
 export { ProductionWorkflowAdapter } from './integrations/ProductionWorkflowAdapter';
 
-export { PersianDigits } from './utils/PersianDigits';
+export { PersianDigits, toPersianDigits, toEnglishDigits } from './utils/PersianDigits';
 export { DateValidator } from './utils/DateValidator';
 
-export { GFTDatePicker as WebtananDatePicker } from './ui/GFTDatePicker';
+export { WebtananDatePicker } from './ui/WebtananDatePicker';
+export type {
+  WebtananDatePickerOptions,
+  WebtananCalendarEvent,
+  WebtananDateRange,
+} from './ui/WebtananDatePicker';
