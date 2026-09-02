@@ -31,6 +31,14 @@ export interface WebtananDateRange {
   end: string;
 }
 
+export interface WebtananDatePickerState {
+  schemaVersion: 1;
+  selectedDate: string | null;
+  selectedRange: WebtananDateRange | null;
+  selectedTime: TimeValue | null;
+  events: WebtananCalendarEvent[];
+}
+
 const parseJalali = (value: string) => {
   const match = /^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/.exec(value.trim());
   if (!match) throw new RangeError('فرمت تاریخ باید مانند 1405/06/11 باشد.');
@@ -157,6 +165,70 @@ export class WebtananDatePicker {
 
   getEvents(date: string): WebtananCalendarEvent[] {
     return [...(this.events.get(formatValue(date)) ?? [])];
+  }
+
+  getAllEvents(): WebtananCalendarEvent[] {
+    return [...this.events.values()].flat().map((event) => ({ ...event }));
+  }
+
+  exportState(): WebtananDatePickerState {
+    const time = this.timeSelector.get();
+    return {
+      schemaVersion: 1,
+      selectedDate: this.selectedDate,
+      selectedRange: this.selectedRange ? { ...this.selectedRange } : null,
+      selectedTime: time ? { ...time } : null,
+      events: this.getAllEvents(),
+    };
+  }
+
+  importState(state: WebtananDatePickerState): void {
+    if (!state || state.schemaVersion !== 1) {
+      throw new Error('نسخه state تقویم پشتیبانی نمی‌شود.');
+    }
+
+    const nextDate = state.selectedDate ? formatValue(state.selectedDate) : null;
+    if (nextDate) this.assertWithinBounds(nextDate);
+
+    let nextRange: WebtananDateRange | null = null;
+    if (state.selectedRange) {
+      const start = formatValue(state.selectedRange.start);
+      const end = formatValue(state.selectedRange.end);
+      this.assertWithinBounds(start);
+      this.assertWithinBounds(end);
+      if (start > end) throw new RangeError('بازه ذخیره‌شده نامعتبر است.');
+      nextRange = { start, end };
+    }
+
+    const nextEvents = new Map<string, WebtananCalendarEvent[]>();
+    for (const event of state.events ?? []) {
+      const date = formatValue(event.date);
+      const current = nextEvents.get(date) ?? [];
+      current.push({ ...event, date });
+      nextEvents.set(date, current);
+    }
+
+    this.timeSelector.clear();
+    if (state.selectedTime) {
+      this.timeSelector.set(
+        state.selectedTime.hour,
+        state.selectedTime.minute,
+        state.selectedTime.second,
+      );
+    }
+
+    this.selectedDate = nextDate;
+    this.selectedRange = nextRange;
+    this.events = nextEvents;
+
+    const focusDate = nextDate ?? nextRange?.start ?? null;
+    if (focusDate) {
+      const parsed = parseJalali(focusDate);
+      this.viewYear = parsed.year;
+      this.viewMonth = parsed.month;
+    }
+
+    this.render();
   }
 
   clear(): void {
