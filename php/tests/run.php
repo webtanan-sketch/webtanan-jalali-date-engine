@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../src/JalaliDate.php';
+require_once __DIR__ . '/../src/JalaliYearInfo.php';
 require_once __DIR__ . '/../src/JalaliValidator.php';
 require_once __DIR__ . '/../src/PdoCalendarStateStore.php';
 
 use Webtanan\JalaliDateEngine\JalaliDate;
+use Webtanan\JalaliDateEngine\JalaliYearInfo;
 use Webtanan\JalaliDateEngine\JalaliValidator;
 use Webtanan\JalaliDateEngine\PdoCalendarStateStore;
 
@@ -38,6 +40,40 @@ $assertSame(
 );
 $assertSame(true, JalaliDate::isLeapYear(1399), '۱۳۹۹ باید کبیسه باشد');
 $assertSame('2021-03-20', JalaliDate::toGregorianIso(1399, 12, 30), 'مرز سال ۱۳۹۹');
+
+// سال‌های قدیمی نیز از همان الگوریتم عمومی استفاده می‌کنند.
+$assertSame(false, JalaliDate::isLeapYear(1360), '۱۳۶۰ باید سال عادی باشد');
+$assertSame(true, JalaliDate::isLeapYear(1358), '۱۳۵۸ باید کبیسه باشد');
+$assertSame(true, JalaliDate::isLeapYear(1362), '۱۳۶۲ باید کبیسه باشد');
+$assertSame(29, JalaliDate::daysInMonth(1360, 12), 'اسفند ۱۳۶۰ باید ۲۹ روز داشته باشد');
+$assertSame(false, JalaliDate::isValid(1360, 12, 30), '۳۰ اسفند ۱۳۶۰ نامعتبر است');
+$assertSame('1981-03-21', JalaliDate::toGregorianIso(1360, 1, 1), 'اول فروردین ۱۳۶۰');
+$assertSame('1982-03-20', JalaliDate::toGregorianIso(1360, 12, 29), 'آخر اسفند ۱۳۶۰');
+$assertSame(
+    [
+        'year' => 1360,
+        'isLeap' => false,
+        'leapStatusFa' => 'عادی',
+        'daysInYear' => 365,
+        'esfandDays' => 29,
+        'farvardin1GregorianISO' => '1981-03-21',
+        'lastDayGregorianISO' => '1982-03-20',
+    ],
+    JalaliYearInfo::get(1360),
+    'اطلاعات کامل سال ۱۳۶۰'
+);
+
+// invariant عمومی کل محدوده پشتیبانی‌شده.
+for ($year = JalaliDate::MIN_YEAR; $year <= JalaliDate::MAX_YEAR; $year++) {
+    $leap = JalaliDate::isLeapYear($year);
+    $expectedEsfand = $leap ? 30 : 29;
+    $assertSame($expectedEsfand, JalaliDate::daysInMonth($year, 12), "تعداد روز اسفند سال {$year}");
+    $assertSame($leap ? 366 : 365, JalaliYearInfo::daysInYear($year), "تعداد روز سال {$year}");
+    $assertSame(true, JalaliDate::isValid($year, 12, $expectedEsfand), "آخر اسفند سال {$year}");
+    if (!$leap) {
+        $assertSame(false, JalaliDate::isValid($year, 12, 30), "رد ۳۰ اسفند سال عادی {$year}");
+    }
+}
 
 $assertSame(false, JalaliDate::isValid(1405, 7, 31), 'اعتبارسنجی روز شمسی نامعتبر');
 $assertSame(false, JalaliDate::isValidGregorian(2026, 2, 29), 'فوریه نامعتبر در سال غیرکبیسه');
