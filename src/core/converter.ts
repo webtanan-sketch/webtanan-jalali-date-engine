@@ -38,19 +38,19 @@ interface JalaliCalculation {
  * leap === 0 یعنی سال جلالی کبیسه است.
  */
 const jalaliCalculation = (year: number): JalaliCalculation => {
-  const firstBreak = JALALI_BREAKS[0];
-  const lastBreak = JALALI_BREAKS[JALALI_BREAKS.length - 1];
+  const firstBreak: number = JALALI_BREAKS[0];
+  const lastBreak: number = JALALI_BREAKS[JALALI_BREAKS.length - 1];
   if (!Number.isInteger(year) || year < firstBreak || year >= lastBreak) {
     throw new RangeError(`سال شمسی خارج از محدوده پشتیبانی است: ${year}`);
   }
 
   const gregorianYear = year + 621;
   let leapJalali = -14;
-  let previousBreak = firstBreak;
+  let previousBreak: number = firstBreak;
   let jump = 0;
 
   for (let index = 1; index < JALALI_BREAKS.length; index += 1) {
-    const currentBreak = JALALI_BREAKS[index];
+    const currentBreak: number = JALALI_BREAKS[index];
     jump = currentBreak - previousBreak;
     if (year < currentBreak) break;
     leapJalali += div(jump, 33) * 8 + div(mod(jump, 33), 4);
@@ -115,7 +115,7 @@ const jalaliToDayNumber = ({ year, month, day }: JalaliDateValue): number => {
 const dayNumberToJalali = (dayNumber: number): JalaliDateValue => {
   const gregorian = dayNumberToGregorian(dayNumber);
   let year = gregorian.year - 621;
-  let calculation = jalaliCalculation(year);
+  const calculation = jalaliCalculation(year);
   const firstFarvardin = gregorianToDayNumber({
     year: gregorian.year,
     month: 3,
@@ -136,7 +136,6 @@ const dayNumberToJalali = (dayNumber: number): JalaliDateValue => {
     year -= 1;
     offset += 179;
     if (calculation.leap === 1) offset += 1;
-    calculation = jalaliCalculation(year);
   }
 
   return {
