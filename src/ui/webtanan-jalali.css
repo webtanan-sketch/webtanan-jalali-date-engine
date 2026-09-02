@@ -1,0 +1,136 @@
+/* Webtanan Jalali Date Engine — Industrial RTL UI */
+
+.webtanan-calendar {
+  direction: rtl;
+  box-sizing: border-box;
+  width: min(100%, 390px);
+  background: #fff;
+  border: 1px solid #d7dce3;
+  border-radius: 12px;
+  padding: 14px;
+  font-family: Tahoma, Arial, sans-serif;
+  color: #172033;
+  box-shadow: 0 10px 32px rgba(23, 32, 51, 0.10);
+}
+
+.webtanan-calendar *,
+.webtanan-calendar *::before,
+.webtanan-calendar *::after {
+  box-sizing: border-box;
+}
+
+.webtanan-calendar__header {
+  display: grid;
+  grid-template-columns: 42px 1fr 42px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.webtanan-calendar__title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.webtanan-calendar__nav {
+  height: 38px;
+  border: 1px solid #d7dce3;
+  border-radius: 8px;
+  background: #f7f8fa;
+  color: #172033;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.webtanan-calendar__nav:hover {
+  background: #eef1f5;
+}
+
+.webtanan-calendar__weekdays,
+.webtanan-calendar__days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.webtanan-calendar__weekdays {
+  margin-bottom: 5px;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.webtanan-calendar__weekdays > span {
+  padding: 5px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.webtanan-calendar__day {
+  position: relative;
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #fff;
+  color: #172033;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.webtanan-calendar__day:hover:not(:disabled) {
+  border-color: #b9c2cf;
+  background: #f8fafc;
+}
+
+.webtanan-calendar__day.is-selected {
+  background: #172033;
+  color: #fff;
+}
+
+.webtanan-calendar__day.is-in-range:not(.is-selected) {
+  background: #eef2f6;
+}
+
+.webtanan-calendar__day.has-event::after {
+  content: '';
+  position: absolute;
+  right: 50%;
+  bottom: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  transform: translateX(50%);
+}
+
+.webtanan-calendar__day:disabled {
+  color: #b7bec8;
+  background: #fafafa;
+  cursor: not-allowed;
+}
+
+.webtanan-calendar__day.is-empty {
+  min-height: 40px;
+  visibility: hidden;
+}
+
+@media (max-width: 480px) {
+  .webtanan-calendar {
+    width: 100%;
+    max-width: none;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  .webtanan-calendar__day {
+    min-height: 38px;
+  }
+
+  .webtanan-calendar__weekdays {
+    font-size: 10px;
+  }
+}
