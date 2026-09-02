@@ -1,6 +1,7 @@
 import { JalaliConverter, type GregorianDateValue, type JalaliDateValue } from './converter';
+import { getJalaliYearInfo, type JalaliYearInfo } from './JalaliYearInfo';
 
-export type { JalaliDateValue, GregorianDateValue };
+export type { JalaliDateValue, GregorianDateValue, JalaliYearInfo };
 
 export class JalaliCore {
   static isValid(date: JalaliDateValue): boolean {
@@ -9,6 +10,14 @@ export class JalaliCore {
 
   static isLeapYear(year: number): boolean {
     return JalaliConverter.isLeapYear(year);
+  }
+
+  static getYearInfo(year: number): JalaliYearInfo {
+    return getJalaliYearInfo(year);
+  }
+
+  static daysInYear(year: number): 365 | 366 {
+    return JalaliConverter.isLeapYear(year) ? 366 : 365;
   }
 
   static daysInMonth(year: number, month: number): number {
