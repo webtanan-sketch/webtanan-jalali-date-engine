@@ -74,15 +74,37 @@
 - اصلاح هسته تبدیل TypeScript و PHP با الگوریتم مبتنی بر نقاط شکست تقویم رسمی جلالی
 - اصلاح مرز کبیسه ۱۴۰۳/۱۴۰۴ و جلوگیری از پذیرش ۱۴۰۴/۱۲/۳۰
 - Regression Test برای ۱۳۹۹، ۱۴۰۳، ۱۴۰۴ و ۱۴۰۵
-- Performance، Web Component، Persistence، REST/Database و Workflowها هم‌زمان تست می‌شوند
 - ۱۷ Test Suite و ۵۸ تست موفق در checkpoint پایدار v0.8
 
+## v0.9.0 — Selection & Policy Layer
+- Range واقعی با تعامل کاربر
+- Multiple Selection داخل DatePicker
+- Disabled Dates
+- جلوگیری از انتخاب روز `closed`
+- اتصال HolidayEngine و DayStatusEngine به UI
+- نمایش وضعیت‌های تعطیل، جلسه، کار و بسته در تقویم
+- توسعه Web Component برای range / multiple / disabled-dates
+- حفظ سازگاری Persistence بین single date، range و multiple
+- ۱۸ Test Suite و ۶۵ تست موفق در checkpoint پایدار v0.9
+
+## v0.10.0 — Professional Themes & Official Holiday Datasets
+- ThemeManager مستقل
+- چهار تم حرفه‌ای: Industrial Light، Navy Command، Steel Neutral و Graphite Dark
+- تم قابل استفاده از طریق Web Component
+- CSS مبتنی بر Variables برای توسعه تم‌های آینده
+- دیتاست کامل تعطیلات رسمی سال ۱۴۰۴
+- دیتاست کامل تعطیلات رسمی سال ۱۴۰۵
+- هر سال با ۲۶ روز تعطیل رسمی مناسبتی
+- metadata منبع، URL و تاریخ بازبینی برای هر Dataset
+- source مستقل `annual-dataset`
+- fallback به تعطیلات ثابت برای سال‌های فاقد دیتاست داخلی
+- تست مجدد سال کبیسه: ۱۴۰۳ کبیسه، ۱۴۰۴ و ۱۴۰۵ عادی
+
 ## برنامه مسیر بعد
-### v0.9.x
-- انتخاب Range واقعی با تعامل کاربر
-- Multiple Selection داخل خود DatePicker
-- Disabled Dates و Policyهای قابل تزریق
-- نمایش Holiday و Day Status در UI
+### v0.11.x
+- Theme selector آماده برای Demoها
+- امکان Theme سفارشی از طریق CSS Variables
+- Dataset loader خارجی برای سال‌های بعد
 - بهبود Roving Tabindex و Focus Management
 
 ### v1.0.0
