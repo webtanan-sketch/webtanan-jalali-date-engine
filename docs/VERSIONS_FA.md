@@ -51,13 +51,25 @@
 - DatePickerPersistence برای save/restore
 - Laravel config قابل انتشار
 - Laravel Blade view قابل انتشار
+- ۴۰ تست JavaScript/TypeScript در نقطه پایدار v0.6
+
+## v0.7.0 — Integration & Validation
+- JalaliValidator برای PHP با پشتیبانی اعداد فارسی و عربی
+- JalaliDateRule برای Validation لاراول
+- اعتبارسنجی واقعی روزهای ماه میلادی در TypeScript و PHP
+- رد تاریخ‌هایی مانند 2026-02-31
+- DatabaseStorageAdapter با Driver تزریقی
+- RestStorageAdapter با GET/PUT/DELETE و Fetch قابل تزریق
+- Web Component مستقل `webtanan-jalali-date-picker`
+- import امن Web Component در Node و محیط‌های بدون DOM
+- Performance/Stress Test برای هزاران تبدیل رفت‌وبرگشت
 
 ## برنامه مسیر بعد
-### v0.7.x
-- Validation Rule لاراول
-- دیتاست‌های سالانه تعطیلات متحرک با منبع مشخص
-- آداپتور Database/REST
-- Web Component مستقل
+### v0.8.x
+- دیتاست سالانه تعطیلات متحرک با منبع مشخص
+- Adapterهای نمونه SQL و Laravel Cache
+- Accessibility و Keyboard Navigation کامل
+- Demoهای اجرایی Web Component و Laravel
 
 ### v1.0.0
 - API پایدار
