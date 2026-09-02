@@ -1,5 +1,6 @@
 import { CalendarRenderer } from '../calendar/CalendarRenderer';
 import { JalaliConverter } from '../core/converter';
+import { TimeSelector, type TimeValue } from '../time/TimeSelector';
 import { PersianDigits } from '../utils/PersianDigits';
 
 export interface WebtananDatePickerOptions {
@@ -7,10 +8,12 @@ export interface WebtananDatePickerOptions {
   rtl: boolean;
   persianDigits: boolean;
   time: boolean;
+  seconds: boolean;
   range: boolean;
   events: boolean;
   holidays: boolean;
   minuteStep: number;
+  secondStep: number;
   minDate?: string;
   maxDate?: string;
 }
@@ -44,6 +47,7 @@ export class WebtananDatePicker {
   private selectedRange: WebtananDateRange | null = null;
   private events = new Map<string, WebtananCalendarEvent[]>();
   private renderer = new CalendarRenderer();
+  private timeSelector: TimeSelector;
   private root: HTMLElement | null = null;
   private viewYear: number;
   private viewMonth: number;
@@ -54,16 +58,20 @@ export class WebtananDatePicker {
       rtl: true,
       persianDigits: true,
       time: false,
+      seconds: false,
       range: false,
       events: true,
       holidays: true,
       minuteStep: 15,
+      secondStep: 1,
       ...options,
     };
 
-    if (this.options.minuteStep < 1 || this.options.minuteStep > 60) {
-      throw new RangeError('گام دقیقه باید بین 1 تا 60 باشد.');
-    }
+    this.timeSelector = new TimeSelector({
+      minuteStep: this.options.minuteStep,
+      secondStep: this.options.secondStep,
+      includeSeconds: this.options.seconds,
+    });
 
     const today = JalaliConverter.fromGregorianDate(new Date());
     this.viewYear = today.year;
@@ -106,6 +114,25 @@ export class WebtananDatePicker {
     return this.selectedDate;
   }
 
+  setTime(hour: number, minute: number, second = 0): void {
+    this.timeSelector.set(hour, minute, second);
+    this.render();
+  }
+
+  getTime(): TimeValue | null {
+    return this.timeSelector.get();
+  }
+
+  getFormattedTime(): string | null {
+    return this.timeSelector.format();
+  }
+
+  getDateTime(): string | null {
+    if (!this.selectedDate) return null;
+    const time = this.timeSelector.format();
+    return time ? `${this.selectedDate} ${time}` : this.selectedDate;
+  }
+
   setRange(start: string, end: string): void {
     const normalizedStart = formatValue(start);
     const normalizedEnd = formatValue(end);
@@ -135,6 +162,7 @@ export class WebtananDatePicker {
   clear(): void {
     this.selectedDate = null;
     this.selectedRange = null;
+    this.timeSelector.clear();
     this.render();
   }
 
@@ -168,6 +196,78 @@ export class WebtananDatePicker {
   private displayNumber(value: string | number): string {
     const text = String(value);
     return this.options.persianDigits ? PersianDigits.toPersian(text) : text;
+  }
+
+  private dispatchChange(): void {
+    if (!this.root || !this.selectedDate || typeof CustomEvent === 'undefined') return;
+    this.root.dispatchEvent(
+      new CustomEvent('webtanan-date-change', {
+        bubbles: true,
+        detail: {
+          jalali: this.selectedDate,
+          gregorian: JalaliConverter.toGregorianISO(parseJalali(this.selectedDate)),
+          time: this.timeSelector.format(),
+          dateTime: this.getDateTime(),
+        },
+      }),
+    );
+  }
+
+  private renderTimePicker(): HTMLElement | null {
+    if (!this.options.time || typeof document === 'undefined') return null;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'webtanan-calendar__time';
+    wrapper.setAttribute('aria-label', 'انتخاب زمان');
+
+    const current = this.timeSelector.get() ?? { hour: 0, minute: 0, second: 0 };
+
+    const makeSelect = (label: string, values: number[], selected: number): HTMLSelectElement => {
+      const select = document.createElement('select');
+      select.className = 'webtanan-calendar__time-select';
+      select.setAttribute('aria-label', label);
+      for (const value of values) {
+        const option = document.createElement('option');
+        option.value = String(value);
+        option.textContent = this.displayNumber(String(value).padStart(2, '0'));
+        option.selected = value === selected;
+        select.appendChild(option);
+      }
+      return select;
+    };
+
+    const hours = makeSelect('ساعت', Array.from({ length: 24 }, (_, index) => index), current.hour);
+    const minutes = makeSelect('دقیقه', this.timeSelector.getMinuteOptions(), current.minute);
+    const secondsValues: number[] = [];
+    for (let value = 0; value < 60; value += this.options.secondStep) secondsValues.push(value);
+    const seconds = this.options.seconds ? makeSelect('ثانیه', secondsValues, current.second) : null;
+
+    const updateTime = () => {
+      this.timeSelector.set(
+        Number(hours.value),
+        Number(minutes.value),
+        seconds ? Number(seconds.value) : 0,
+      );
+      this.dispatchChange();
+    };
+
+    hours.addEventListener('change', updateTime);
+    minutes.addEventListener('change', updateTime);
+    seconds?.addEventListener('change', updateTime);
+
+    const hourLabel = document.createElement('span');
+    hourLabel.textContent = 'ساعت';
+    const minuteLabel = document.createElement('span');
+    minuteLabel.textContent = 'دقیقه';
+
+    wrapper.append(hourLabel, hours, minuteLabel, minutes);
+    if (seconds) {
+      const secondLabel = document.createElement('span');
+      secondLabel.textContent = 'ثانیه';
+      wrapper.append(secondLabel, seconds);
+    }
+
+    return wrapper;
   }
 
   private render(): void {
@@ -240,15 +340,7 @@ export class WebtananDatePicker {
 
       button.addEventListener('click', () => {
         this.selectedDate = cell.date;
-        this.root?.dispatchEvent(
-          new CustomEvent('webtanan-date-change', {
-            bubbles: true,
-            detail: {
-              jalali: cell.date,
-              gregorian: JalaliConverter.toGregorianISO(parseJalali(cell.date as string)),
-            },
-          }),
-        );
+        this.dispatchChange();
         this.render();
       });
 
@@ -256,6 +348,8 @@ export class WebtananDatePicker {
     }
 
     this.root.append(header, weekdays, days);
+    const timePicker = this.renderTimePicker();
+    if (timePicker) this.root.appendChild(timePicker);
   }
 }
 
