@@ -1,4 +1,5 @@
 import type { Holiday, HolidayProvider } from '../HolidayEngine';
+import { getIranOfficialHolidayDataset } from './IranOfficialHolidayDatasets';
 
 interface FixedSolarHoliday {
   month: number;
@@ -29,31 +30,38 @@ export interface MovableIranHoliday {
 }
 
 export interface IranHolidayProviderOptions {
-  /**
-   * تعطیلات قمری/متحرک باید برای هر سال از منبع تقویم رسمی همان سال وارد شوند.
-   * این Provider عمداً تاریخ متحرک را حدس نمی‌زند.
-   */
+  /** تعطیلات تکمیلی سازمان یا دیتاست خارجی برای یک سال خاص. */
   movable?: Record<number, MovableIranHoliday[]>;
+  /**
+   * برای سال‌هایی که دیتاست رسمی داخلی داریم، به‌صورت پیش‌فرض همان دیتاست کامل استفاده می‌شود.
+   * در v0.10 دیتاست کامل سال‌های ۱۴۰۴ و ۱۴۰۵ داخل پکیج قرار دارد.
+   */
+  useBuiltInAnnualDatasets?: boolean;
 }
 
 const pad = (value: number): string => String(value).padStart(2, '0');
 
 export class IranHolidayProvider implements HolidayProvider {
   readonly name = 'Iran Official Holidays';
-  readonly version = '0.6.0-fixed-solar-v1';
+  readonly version = '0.10.0-official-annual-v1';
 
   constructor(private readonly options: IranHolidayProviderOptions = {}) {}
 
   getHolidays(year: number): Holiday[] {
     if (!Number.isInteger(year) || year < 1) throw new RangeError('سال شمسی نامعتبر است.');
 
-    const fixed: Holiday[] = FIXED_SOLAR_HOLIDAYS.map((holiday) => ({
-      id: holiday.id,
-      date: `${year}/${pad(holiday.month)}/${pad(holiday.day)}`,
-      title: holiday.title,
-      type: 'official',
-      source: 'fixed-solar',
-    }));
+    const useBuiltIn = this.options.useBuiltInAnnualDatasets !== false;
+    const builtIn = useBuiltIn ? getIranOfficialHolidayDataset(year) : null;
+
+    const base: Holiday[] = builtIn
+      ? builtIn.getHolidays(year)
+      : FIXED_SOLAR_HOLIDAYS.map((holiday) => ({
+          id: holiday.id,
+          date: `${year}/${pad(holiday.month)}/${pad(holiday.day)}`,
+          title: holiday.title,
+          type: 'official',
+          source: 'fixed-solar',
+        }));
 
     const movable: Holiday[] = (this.options.movable?.[year] ?? []).map((holiday) => ({
       id: holiday.id,
@@ -64,7 +72,7 @@ export class IranHolidayProvider implements HolidayProvider {
       description: holiday.description,
     }));
 
-    return [...fixed, ...movable];
+    return [...base, ...movable];
   }
 }
 
