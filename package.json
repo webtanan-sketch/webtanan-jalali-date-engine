@@ -1,0 +1,14 @@
+{
+  "name": "webtanan-jalali-date-engine",
+  "version": "0.2.0",
+  "description": "موتور تاریخ شمسی حرفه ای برای JavaScript، React، Vue، Electron و برنامه های وب",
+  "main": "dist/webtanan-jalali.js",
+  "module": "dist/webtanan-jalali.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": ["jalali","persian-calendar","datepicker","iran","rtl"],
+  "license": "MIT"
+}
