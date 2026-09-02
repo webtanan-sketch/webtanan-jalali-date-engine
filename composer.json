@@ -13,7 +13,7 @@
   },
   "suggest": {
     "illuminate/support": "برای یکپارچه‌سازی خودکار با Laravel",
-    "illuminate/contracts": "برای استفاده از JalaliDateRule در Validation لاراول"
+    "illuminate/contracts": "برای Validation Rule و Laravel Cache State Store"
   },
   "extra": {
     "laravel": {
