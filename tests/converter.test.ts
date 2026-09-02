@@ -19,7 +19,17 @@ describe('JalaliConverter', () => {
     expect(JalaliConverter.toJalali(gregorian)).toEqual(source);
   });
 
-  test('روز نامعتبر رد می‌شود', () => {
+  test('روز شمسی نامعتبر رد می‌شود', () => {
     expect(JalaliConverter.isValid({ year: 1405, month: 7, day: 31 })).toBe(false);
+  });
+
+  test('روز میلادی نامعتبر بر اساس ماه رد می‌شود', () => {
+    expect(JalaliConverter.isValidGregorian({ year: 2026, month: 2, day: 29 })).toBe(false);
+    expect(JalaliConverter.isValidGregorian({ year: 2028, month: 2, day: 29 })).toBe(true);
+    expect(() => JalaliConverter.toJalali({ year: 2026, month: 2, day: 31 })).toThrow();
+  });
+
+  test('Date نامعتبر رد می‌شود', () => {
+    expect(() => JalaliConverter.fromGregorianDate(new Date(Number.NaN))).toThrow();
   });
 });
