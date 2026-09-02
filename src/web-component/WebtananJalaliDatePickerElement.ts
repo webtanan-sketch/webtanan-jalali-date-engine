@@ -94,6 +94,7 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
       disabledDates: this.disabledDatesFromAttribute(),
       minDate: this.getAttribute('min-date') ?? undefined,
       maxDate: this.getAttribute('max-date') ?? undefined,
+      theme: this.theme,
     };
   }
 
@@ -122,8 +123,7 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
       }
     }
 
-    const root = this.picker.open(this);
-    if (root) ThemeManager.apply(root, this.theme);
+    this.picker.open(this);
     this.addEventListener('webtanan-date-change', this.forwardChange as EventListener);
   }
 
