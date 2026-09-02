@@ -1,15 +1,29 @@
 {
   "name": "webtanan/jalali-date-engine",
-  "description": "موتور حرفه ای تاریخ شمسی برای Laravel و PHP Framework ها",
+  "description": "موتور حرفه‌ای تاریخ شمسی برای Laravel، PHP و فریم‌ورک‌های مدرن وب",
   "type": "library",
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Webtanan\\JalaliDateEngine\\": "src/"
+      "Webtanan\\JalaliDateEngine\\": "php/src/"
     }
   },
   "require": {
     "php": ">=8.1"
   },
-  "minimum-stability": "stable"
+  "suggest": {
+    "illuminate/support": "برای یکپارچه‌سازی خودکار با Laravel"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Webtanan\\JalaliDateEngine\\Laravel\\WebtananJalaliServiceProvider"
+      ],
+      "aliases": {
+        "JalaliDate": "Webtanan\\JalaliDateEngine\\Laravel\\JalaliDateFacade"
+      }
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
 }
