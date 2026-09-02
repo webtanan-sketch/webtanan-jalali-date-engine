@@ -19,11 +19,7 @@ describe('DatePicker selection and policy', () => {
   });
 
   test('disabled dates در انتخاب مستقیم و بازه اعمال می‌شوند', () => {
-    const picker = new WebtananDatePicker({
-      range: true,
-      disabledDates: ['1405/06/10'],
-    });
-
+    const picker = new WebtananDatePicker({ range: true, disabledDates: ['1405/06/10'] });
     expect(picker.isDateDisabled('1405/06/10')).toBe(true);
     expect(() => picker.setDate('1405/06/10')).toThrow('غیرفعال');
     expect(() => picker.setRange('1405/06/01', '1405/06/20')).toThrow('1405/06/10');
@@ -43,6 +39,7 @@ describe('DatePicker selection and policy', () => {
     holidays.add({ date: '1405/01/01', title: 'نوروز', type: 'official', source: 'fixed-solar' });
     const statuses = new DayStatusEngine();
     statuses.set('1405/06/11', 'meeting');
+    statuses.set('1405/06/12', 'closed');
 
     const picker = new WebtananDatePicker();
     picker.setHolidayEngine(holidays);
@@ -50,7 +47,17 @@ describe('DatePicker selection and policy', () => {
 
     expect(picker.getHolidays('1405/01/01')[0]?.title).toBe('نوروز');
     expect(picker.getDayStatus('1405/06/11')).toBe('meeting');
-    expect(picker.getDayStatus('1405/06/12')).toBe('free');
+    expect(picker.getDayStatus('1405/06/12')).toBe('closed');
+    expect(picker.isDateDisabled('1405/06/12')).toBe(true);
+    expect(() => picker.setDate('1405/06/12')).toThrow('بسته');
+  });
+
+  test('range شامل روز بسته رد می‌شود', () => {
+    const statuses = new DayStatusEngine();
+    statuses.set('1405/06/15', 'closed');
+    const picker = new WebtananDatePicker({ range: true });
+    picker.setDayStatusEngine(statuses);
+    expect(() => picker.setRange('1405/06/10', '1405/06/20')).toThrow('1405/06/15');
   });
 
   test('state چندتاریخی export/import می‌شود', () => {
