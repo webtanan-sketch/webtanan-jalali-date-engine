@@ -1,6 +1,8 @@
 import { KeyboardDateNavigator, type CalendarNavigationKey } from '../accessibility/KeyboardDateNavigator';
 import { CalendarRenderer } from '../calendar/CalendarRenderer';
 import { JalaliConverter } from '../core/converter';
+import { DayStatusEngine, type DayStatus } from '../enterprise/DayStatusEngine';
+import { HolidayEngine, type Holiday } from '../enterprise/HolidayEngine';
 import { TimeSelector, type TimeValue } from '../time/TimeSelector';
 import { PersianDigits } from '../utils/PersianDigits';
 
@@ -11,12 +13,14 @@ export interface WebtananDatePickerOptions {
   time: boolean;
   seconds: boolean;
   range: boolean;
+  multiple: boolean;
   events: boolean;
   holidays: boolean;
   minuteStep: number;
   secondStep: number;
   minDate?: string;
   maxDate?: string;
+  disabledDates: string[];
 }
 
 export interface WebtananCalendarEvent {
@@ -38,6 +42,7 @@ export interface WebtananDatePickerState {
   selectedRange: WebtananDateRange | null;
   selectedTime: TimeValue | null;
   events: WebtananCalendarEvent[];
+  selectedDates?: string[];
 }
 
 const parseJalali = (value: string) => {
@@ -50,23 +55,21 @@ const parseJalali = (value: string) => {
 
 const formatValue = (value: string): string => JalaliConverter.format(parseJalali(value));
 const NAVIGATION_KEYS: CalendarNavigationKey[] = [
-  'ArrowLeft',
-  'ArrowRight',
-  'ArrowUp',
-  'ArrowDown',
-  'PageUp',
-  'PageDown',
-  'Home',
-  'End',
+  'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End',
 ];
 
 export class WebtananDatePicker {
   private options: WebtananDatePickerOptions;
   private selectedDate: string | null = null;
   private selectedRange: WebtananDateRange | null = null;
+  private selectedDates = new Set<string>();
+  private rangeAnchor: string | null = null;
+  private disabledDates = new Set<string>();
   private events = new Map<string, WebtananCalendarEvent[]>();
   private renderer = new CalendarRenderer();
   private timeSelector: TimeSelector;
+  private holidayEngine: HolidayEngine | null = null;
+  private dayStatusEngine: DayStatusEngine | null = null;
   private root: HTMLElement | null = null;
   private viewYear: number;
   private viewMonth: number;
@@ -79,13 +82,20 @@ export class WebtananDatePicker {
       time: false,
       seconds: false,
       range: false,
+      multiple: false,
       events: true,
       holidays: true,
       minuteStep: 15,
       secondStep: 1,
+      disabledDates: [],
       ...options,
     };
 
+    if (this.options.range && this.options.multiple) {
+      throw new Error('حالت range و multiple نمی‌توانند هم‌زمان فعال باشند.');
+    }
+
+    this.disabledDates = new Set(this.options.disabledDates.map(formatValue));
     this.timeSelector = new TimeSelector({
       minuteStep: this.options.minuteStep,
       secondStep: this.options.secondStep,
@@ -99,7 +109,6 @@ export class WebtananDatePicker {
 
   open(target?: HTMLElement | string): HTMLElement | null {
     if (typeof document === 'undefined') return null;
-
     this.close();
     const host = typeof target === 'string' ? document.querySelector<HTMLElement>(target) : target;
     const root = document.createElement('section');
@@ -110,7 +119,6 @@ export class WebtananDatePicker {
     root.setAttribute('aria-label', 'انتخاب تاریخ شمسی');
     root.addEventListener('keydown', this.handleKeyDown);
     this.root = root;
-
     (host ?? document.body).appendChild(root);
     this.render();
     return root;
@@ -124,7 +132,7 @@ export class WebtananDatePicker {
 
   setDate(date: string): void {
     const normalized = formatValue(date);
-    this.assertWithinBounds(normalized);
+    this.assertDateAllowed(normalized);
     this.applySelectedDate(normalized, false);
   }
 
@@ -154,15 +162,90 @@ export class WebtananDatePicker {
   setRange(start: string, end: string): void {
     const normalizedStart = formatValue(start);
     const normalizedEnd = formatValue(end);
-    this.assertWithinBounds(normalizedStart);
-    this.assertWithinBounds(normalizedEnd);
+    this.assertDateAllowed(normalizedStart);
+    this.assertDateAllowed(normalizedEnd);
     if (normalizedStart > normalizedEnd) throw new RangeError('تاریخ شروع نباید بعد از تاریخ پایان باشد.');
+    this.assertRangeHasNoDisabledDate(normalizedStart, normalizedEnd);
     this.selectedRange = { start: normalizedStart, end: normalizedEnd };
+    this.rangeAnchor = null;
+    this.selectedDate = normalizedEnd;
     this.render();
   }
 
   getRange(): WebtananDateRange | null {
     return this.selectedRange ? { ...this.selectedRange } : null;
+  }
+
+  setMultipleDates(dates: string[]): void {
+    if (!Array.isArray(dates)) throw new TypeError('dates باید آرایه باشد.');
+    const next = new Set<string>();
+    for (const date of dates) {
+      const normalized = formatValue(date);
+      this.assertDateAllowed(normalized);
+      next.add(normalized);
+    }
+    this.selectedDates = next;
+    this.selectedDate = [...next].sort().at(-1) ?? null;
+    this.render();
+  }
+
+  getMultipleDates(): string[] {
+    return [...this.selectedDates].sort();
+  }
+
+  toggleMultipleDate(date: string): boolean {
+    const normalized = formatValue(date);
+    this.assertDateAllowed(normalized);
+    if (this.selectedDates.has(normalized)) {
+      this.selectedDates.delete(normalized);
+      if (this.selectedDate === normalized) this.selectedDate = [...this.selectedDates].sort().at(-1) ?? null;
+      this.render();
+      return false;
+    }
+    this.selectedDates.add(normalized);
+    this.selectedDate = normalized;
+    const parsed = parseJalali(normalized);
+    this.viewYear = parsed.year;
+    this.viewMonth = parsed.month;
+    this.render();
+    return true;
+  }
+
+  setDisabledDates(dates: string[]): void {
+    const next = new Set<string>();
+    for (const date of dates) next.add(formatValue(date));
+    this.disabledDates = next;
+    this.options.disabledDates = [...next];
+    this.dropDisabledSelections();
+    this.render();
+  }
+
+  getDisabledDates(): string[] {
+    return [...this.disabledDates].sort();
+  }
+
+  isDateDisabled(date: string): boolean {
+    const normalized = formatValue(date);
+    return this.isOutsideBounds(normalized) || this.disabledDates.has(normalized);
+  }
+
+  setHolidayEngine(engine: HolidayEngine | null): void {
+    this.holidayEngine = engine;
+    this.render();
+  }
+
+  getHolidays(date: string): Holiday[] {
+    if (!this.holidayEngine) return [];
+    return this.holidayEngine.get(formatValue(date));
+  }
+
+  setDayStatusEngine(engine: DayStatusEngine | null): void {
+    this.dayStatusEngine = engine;
+    this.render();
+  }
+
+  getDayStatus(date: string): DayStatus {
+    return this.dayStatusEngine?.get(formatValue(date)) ?? 'free';
   }
 
   addEvent(event: WebtananCalendarEvent): void {
@@ -189,25 +272,32 @@ export class WebtananDatePicker {
       selectedRange: this.selectedRange ? { ...this.selectedRange } : null,
       selectedTime: time ? { ...time } : null,
       events: this.getAllEvents(),
+      selectedDates: this.getMultipleDates(),
     };
   }
 
   importState(state: WebtananDatePickerState): void {
-    if (!state || state.schemaVersion !== 1) {
-      throw new Error('نسخه state تقویم پشتیبانی نمی‌شود.');
-    }
+    if (!state || state.schemaVersion !== 1) throw new Error('نسخه state تقویم پشتیبانی نمی‌شود.');
 
     const nextDate = state.selectedDate ? formatValue(state.selectedDate) : null;
-    if (nextDate) this.assertWithinBounds(nextDate);
+    if (nextDate) this.assertDateAllowed(nextDate);
 
     let nextRange: WebtananDateRange | null = null;
     if (state.selectedRange) {
       const start = formatValue(state.selectedRange.start);
       const end = formatValue(state.selectedRange.end);
-      this.assertWithinBounds(start);
-      this.assertWithinBounds(end);
+      this.assertDateAllowed(start);
+      this.assertDateAllowed(end);
       if (start > end) throw new RangeError('بازه ذخیره‌شده نامعتبر است.');
+      this.assertRangeHasNoDisabledDate(start, end);
       nextRange = { start, end };
+    }
+
+    const nextDates = new Set<string>();
+    for (const date of state.selectedDates ?? []) {
+      const normalized = formatValue(date);
+      this.assertDateAllowed(normalized);
+      nextDates.add(normalized);
     }
 
     const nextEvents = new Map<string, WebtananCalendarEvent[]>();
@@ -220,30 +310,29 @@ export class WebtananDatePicker {
 
     this.timeSelector.clear();
     if (state.selectedTime) {
-      this.timeSelector.set(
-        state.selectedTime.hour,
-        state.selectedTime.minute,
-        state.selectedTime.second,
-      );
+      this.timeSelector.set(state.selectedTime.hour, state.selectedTime.minute, state.selectedTime.second);
     }
 
     this.selectedDate = nextDate;
     this.selectedRange = nextRange;
+    this.selectedDates = nextDates;
+    this.rangeAnchor = null;
     this.events = nextEvents;
 
-    const focusDate = nextDate ?? nextRange?.start ?? null;
+    const focusDate = nextDate ?? nextRange?.start ?? [...nextDates].sort().at(-1) ?? null;
     if (focusDate) {
       const parsed = parseJalali(focusDate);
       this.viewYear = parsed.year;
       this.viewMonth = parsed.month;
     }
-
     this.render();
   }
 
   clear(): void {
     this.selectedDate = null;
     this.selectedRange = null;
+    this.selectedDates.clear();
+    this.rangeAnchor = null;
     this.timeSelector.clear();
     this.render();
   }
@@ -275,10 +364,77 @@ export class WebtananDatePicker {
     this.render();
   }
 
+  private selectByMode(date: string): void {
+    this.assertDateAllowed(date);
+
+    if (this.options.multiple) {
+      if (this.selectedDates.has(date)) this.selectedDates.delete(date);
+      else this.selectedDates.add(date);
+      this.selectedDate = date;
+      this.dispatchChange();
+      this.render();
+      return;
+    }
+
+    if (this.options.range) {
+      if (!this.rangeAnchor) {
+        this.rangeAnchor = date;
+        this.selectedRange = { start: date, end: date };
+        this.selectedDate = date;
+      } else {
+        const start = this.rangeAnchor <= date ? this.rangeAnchor : date;
+        const end = this.rangeAnchor <= date ? date : this.rangeAnchor;
+        this.assertRangeHasNoDisabledDate(start, end);
+        this.selectedRange = { start, end };
+        this.selectedDate = date;
+        this.rangeAnchor = null;
+      }
+      this.dispatchChange();
+      this.render();
+      return;
+    }
+
+    this.applySelectedDate(date, true);
+  }
+
+  private dropDisabledSelections(): void {
+    if (this.selectedDate && this.isDateDisabled(this.selectedDate)) this.selectedDate = null;
+    for (const date of [...this.selectedDates]) {
+      if (this.isDateDisabled(date)) this.selectedDates.delete(date);
+    }
+    if (this.selectedRange) {
+      try {
+        this.assertRangeHasNoDisabledDate(this.selectedRange.start, this.selectedRange.end);
+      } catch {
+        this.selectedRange = null;
+        this.rangeAnchor = null;
+      }
+    }
+  }
+
+  private isOutsideBounds(date: string): boolean {
+    if (this.options.minDate && date < formatValue(this.options.minDate)) return true;
+    if (this.options.maxDate && date > formatValue(this.options.maxDate)) return true;
+    return false;
+  }
+
+  private assertDateAllowed(date: string): void {
+    if (this.isOutsideBounds(date)) throw new RangeError('تاریخ انتخابی خارج از محدوده مجاز است.');
+    if (this.disabledDates.has(date)) throw new RangeError('تاریخ انتخابی غیرفعال است.');
+  }
+
+  private assertRangeHasNoDisabledDate(start: string, end: string): void {
+    if (!this.disabledDates.size) return;
+    for (const disabled of this.disabledDates) {
+      if (disabled >= start && disabled <= end) {
+        throw new RangeError(`بازه شامل تاریخ غیرفعال ${disabled} است.`);
+      }
+    }
+  }
+
   private focusDate(date: string): void {
     if (!this.root) return;
-    const button = this.root.querySelector<HTMLButtonElement>(`button[data-date="${date}"]`);
-    button?.focus();
+    this.root.querySelector<HTMLButtonElement>(`button[data-date="${date}"]`)?.focus();
   }
 
   private handleKeyDown = (event: KeyboardEvent): void => {
@@ -289,37 +445,17 @@ export class WebtananDatePicker {
     }
 
     const target = event.target;
-    if (target instanceof HTMLSelectElement || target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
-      return;
-    }
-
+    if (target instanceof HTMLSelectElement || target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
     if (!NAVIGATION_KEYS.includes(event.key as CalendarNavigationKey)) return;
     event.preventDefault();
 
-    const base = this.selectedDate
-      ? parseJalali(this.selectedDate)
-      : { year: this.viewYear, month: this.viewMonth, day: 1 };
+    const base = this.selectedDate ? parseJalali(this.selectedDate) : { year: this.viewYear, month: this.viewMonth, day: 1 };
     const next = KeyboardDateNavigator.navigate(base, event.key as CalendarNavigationKey, this.options.rtl);
     const normalized = JalaliConverter.format(next);
-
-    try {
-      this.assertWithinBounds(normalized);
-    } catch {
-      return;
-    }
-
+    if (this.isDateDisabled(normalized)) return;
     this.applySelectedDate(normalized, true);
     this.focusDate(normalized);
   };
-
-  private assertWithinBounds(date: string): void {
-    if (this.options.minDate && date < formatValue(this.options.minDate)) {
-      throw new RangeError('تاریخ انتخابی قبل از حداقل تاریخ مجاز است.');
-    }
-    if (this.options.maxDate && date > formatValue(this.options.maxDate)) {
-      throw new RangeError('تاریخ انتخابی بعد از حداکثر تاریخ مجاز است.');
-    }
-  }
 
   private displayNumber(value: string | number): string {
     const text = String(value);
@@ -327,27 +463,25 @@ export class WebtananDatePicker {
   }
 
   private dispatchChange(): void {
-    if (!this.root || !this.selectedDate || typeof CustomEvent === 'undefined') return;
-    this.root.dispatchEvent(
-      new CustomEvent('webtanan-date-change', {
-        bubbles: true,
-        detail: {
-          jalali: this.selectedDate,
-          gregorian: JalaliConverter.toGregorianISO(parseJalali(this.selectedDate)),
-          time: this.timeSelector.format(),
-          dateTime: this.getDateTime(),
-        },
-      }),
-    );
+    if (!this.root || typeof CustomEvent === 'undefined') return;
+    this.root.dispatchEvent(new CustomEvent('webtanan-date-change', {
+      bubbles: true,
+      detail: {
+        jalali: this.selectedDate,
+        gregorian: this.selectedDate ? JalaliConverter.toGregorianISO(parseJalali(this.selectedDate)) : null,
+        time: this.timeSelector.format(),
+        dateTime: this.getDateTime(),
+        range: this.getRange(),
+        selectedDates: this.getMultipleDates(),
+      },
+    }));
   }
 
   private renderTimePicker(): HTMLElement | null {
     if (!this.options.time || typeof document === 'undefined') return null;
-
     const wrapper = document.createElement('div');
     wrapper.className = 'webtanan-calendar__time';
     wrapper.setAttribute('aria-label', 'انتخاب زمان');
-
     const current = this.timeSelector.get() ?? { hour: 0, minute: 0, second: 0 };
 
     const makeSelect = (label: string, values: number[], selected: number): HTMLSelectElement => {
@@ -371,14 +505,9 @@ export class WebtananDatePicker {
     const seconds = this.options.seconds ? makeSelect('ثانیه', secondsValues, current.second) : null;
 
     const updateTime = () => {
-      this.timeSelector.set(
-        Number(hours.value),
-        Number(minutes.value),
-        seconds ? Number(seconds.value) : 0,
-      );
+      this.timeSelector.set(Number(hours.value), Number(minutes.value), seconds ? Number(seconds.value) : 0);
       this.dispatchChange();
     };
-
     hours.addEventListener('change', updateTime);
     minutes.addEventListener('change', updateTime);
     seconds?.addEventListener('change', updateTime);
@@ -387,46 +516,39 @@ export class WebtananDatePicker {
     hourLabel.textContent = 'ساعت';
     const minuteLabel = document.createElement('span');
     minuteLabel.textContent = 'دقیقه';
-
     wrapper.append(hourLabel, hours, minuteLabel, minutes);
     if (seconds) {
       const secondLabel = document.createElement('span');
       secondLabel.textContent = 'ثانیه';
       wrapper.append(secondLabel, seconds);
     }
-
     return wrapper;
   }
 
   private render(): void {
     if (!this.root || typeof document === 'undefined') return;
-
     const view = this.renderer.render(this.viewYear, this.viewMonth);
     const today = JalaliConverter.format(JalaliConverter.fromGregorianDate(new Date()));
     this.root.replaceChildren();
 
     const header = document.createElement('header');
     header.className = 'webtanan-calendar__header';
-
     const previous = document.createElement('button');
     previous.type = 'button';
     previous.className = 'webtanan-calendar__nav';
     previous.setAttribute('aria-label', 'ماه قبل');
     previous.textContent = '‹';
     previous.addEventListener('click', () => this.previousMonth());
-
     const title = document.createElement('strong');
     title.className = 'webtanan-calendar__title';
     title.setAttribute('aria-live', 'polite');
     title.textContent = `${view.monthName} ${this.displayNumber(view.year)}`;
-
     const next = document.createElement('button');
     next.type = 'button';
     next.className = 'webtanan-calendar__nav';
     next.setAttribute('aria-label', 'ماه بعد');
     next.textContent = '›';
     next.addEventListener('click', () => this.nextMonth());
-
     header.append(previous, title, next);
 
     const weekdays = document.createElement('div');
@@ -443,7 +565,13 @@ export class WebtananDatePicker {
     days.setAttribute('role', 'grid');
     days.setAttribute('aria-label', `${view.monthName} ${view.year}`);
 
-    let focusAssigned = false;
+    const availableDates = view.cells
+      .map((cell) => cell.date)
+      .filter((date): date is string => Boolean(date) && !this.isDateDisabled(date as string));
+    const selectedInView = this.selectedDate && availableDates.includes(this.selectedDate) ? this.selectedDate : null;
+    const todayInView = availableDates.includes(today) ? today : null;
+    const focusTarget = selectedInView ?? todayInView ?? availableDates[0] ?? null;
+
     for (const cell of view.cells) {
       if (!cell.date || cell.day === null) {
         const empty = document.createElement('span');
@@ -460,47 +588,43 @@ export class WebtananDatePicker {
       button.setAttribute('role', 'gridcell');
       button.textContent = this.displayNumber(cell.day);
 
-      const selected = cell.date === this.selectedDate;
+      const singleSelected = cell.date === this.selectedDate;
+      const multipleSelected = this.selectedDates.has(cell.date);
+      const inRange = Boolean(this.selectedRange && cell.date >= this.selectedRange.start && cell.date <= this.selectedRange.end);
+      const selected = this.options.multiple ? multipleSelected : this.options.range ? inRange : singleSelected;
       button.setAttribute('aria-selected', selected ? 'true' : 'false');
-      if (selected) button.classList.add('is-selected');
+      if (singleSelected && !this.options.multiple) button.classList.add('is-selected');
+      if (multipleSelected) button.classList.add('is-multi-selected');
+      if (inRange) button.classList.add('is-in-range');
       if (cell.date === today) button.setAttribute('aria-current', 'date');
 
-      if (this.selectedRange && cell.date >= this.selectedRange.start && cell.date <= this.selectedRange.end) {
-        button.classList.add('is-in-range');
-      }
-
       const eventTitles = this.events.get(cell.date)?.map((event) => event.title) ?? [];
-      if (eventTitles.length > 0) {
-        button.classList.add('has-event');
-        button.title = eventTitles.join('، ');
-      }
+      if (eventTitles.length) button.classList.add('has-event');
 
-      button.setAttribute(
-        'aria-label',
-        `${this.displayNumber(cell.day)} ${view.monthName} ${this.displayNumber(view.year)}${
-          eventTitles.length ? `، ${eventTitles.join('، ')}` : ''
-        }`,
-      );
+      const holidays = this.options.holidays && this.holidayEngine ? this.holidayEngine.get(cell.date) : [];
+      if (holidays.length) button.classList.add('is-holiday');
 
-      const disabled =
-        (this.options.minDate ? cell.date < formatValue(this.options.minDate) : false) ||
-        (this.options.maxDate ? cell.date > formatValue(this.options.maxDate) : false);
+      const status = this.dayStatusEngine?.get(cell.date) ?? 'free';
+      button.dataset.status = status;
+      if (status !== 'free') button.classList.add(`status-${status}`);
+
+      const metadata = [
+        ...eventTitles,
+        ...holidays.map((holiday) => holiday.title),
+        status !== 'free' ? `وضعیت: ${status}` : '',
+      ].filter(Boolean);
+      button.title = metadata.join('، ');
+      button.setAttribute('aria-label', `${this.displayNumber(cell.day)} ${view.monthName} ${this.displayNumber(view.year)}${metadata.length ? `، ${metadata.join('، ')}` : ''}`);
+
+      const disabled = this.isDateDisabled(cell.date) || status === 'closed';
       button.disabled = disabled;
       button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
-
-      const preferredFocus = selected || (!this.selectedDate && cell.date === today);
-      if (!disabled && (preferredFocus || !focusAssigned)) {
-        button.tabIndex = 0;
-        focusAssigned = true;
-      } else {
-        button.tabIndex = -1;
-      }
+      button.tabIndex = !disabled && cell.date === focusTarget ? 0 : -1;
 
       button.addEventListener('click', () => {
-        this.applySelectedDate(cell.date as string, true);
+        this.selectByMode(cell.date as string);
         this.focusDate(cell.date as string);
       });
-
       days.appendChild(button);
     }
 
