@@ -62,8 +62,17 @@ export { JsonRepository } from './storage/JsonRepository';
 export type { StoredEnvelope, JsonRepositoryOptions } from './storage/JsonRepository';
 export { DatePickerPersistence } from './storage/DatePickerPersistence';
 
-export { ThemeManager, WEBTANAN_THEME_PRESETS } from './theme/ThemeManager';
-export type { WebtananThemeName, WebtananThemePreset } from './theme/ThemeManager';
+export {
+  ThemeManager,
+  WEBTANAN_THEME_PRESETS,
+  WEBTANAN_THEME_VARIABLES,
+} from './theme/ThemeManager';
+export type {
+  WebtananThemeName,
+  WebtananThemePreset,
+  WebtananThemeVariable,
+  WebtananCustomThemeVariables,
+} from './theme/ThemeManager';
 
 export { PersianDigits, toPersianDigits, toEnglishDigits } from './utils/PersianDigits';
 export { DateValidator } from './utils/DateValidator';
