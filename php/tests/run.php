@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../src/JalaliDate.php';
 require_once __DIR__ . '/../src/JalaliValidator.php';
+require_once __DIR__ . '/../src/PdoCalendarStateStore.php';
 
 use Webtanan\JalaliDateEngine\JalaliDate;
 use Webtanan\JalaliDateEngine\JalaliValidator;
+use Webtanan\JalaliDateEngine\PdoCalendarStateStore;
 
 $failures = [];
 
@@ -28,6 +30,18 @@ $assertSame(true, JalaliDate::isValidGregorian(2028, 2, 29), 'فوریه معت�
 $assertSame(true, JalaliValidator::isValidString('۱۴۰۵/۰۶/۱۱'), 'پذیرش اعداد فارسی');
 $assertSame('1405/06/11', JalaliValidator::normalize('۱۴۰۵/۶/۱۱'), 'نرمال‌سازی تاریخ فارسی');
 $assertSame(null, JalaliValidator::normalize('1405/07/31'), 'رد تاریخ شمسی نامعتبر');
+
+if (in_array('sqlite', PDO::getAvailableDrivers(), true)) {
+    $pdo = new PDO('sqlite::memory:');
+    $store = new PdoCalendarStateStore($pdo);
+    $store->install();
+    $store->put('crm:12', '{"date":"1405/06/11"}');
+    $assertSame('{"date":"1405/06/11"}', $store->get('crm:12'), 'ذخیره PDO');
+    $store->put('crm:12', '{"date":"1405/06/12"}');
+    $assertSame('{"date":"1405/06/12"}', $store->get('crm:12'), 'به‌روزرسانی PDO');
+    $store->delete('crm:12');
+    $assertSame(null, $store->get('crm:12'), 'حذف PDO');
+}
 
 if ($failures !== []) {
     fwrite(STDERR, implode(PHP_EOL, $failures) . PHP_EOL);
