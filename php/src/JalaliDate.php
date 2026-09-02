@@ -23,6 +23,12 @@ final class JalaliDate
         return self::isLeapYear($year) ? 30 : 29;
     }
 
+    public static function isValidGregorian(int $year, int $month, int $day): bool
+    {
+        $max = self::daysInGregorianMonth($year, $month);
+        return $max > 0 && $day >= 1 && $day <= $max;
+    }
+
     public static function format(int $year, int $month, int $day, string $separator = '/'): string
     {
         if (!self::isValid($year, $month, $day)) {
@@ -58,7 +64,7 @@ final class JalaliDate
     /** @return array{year:int,month:int,day:int} */
     public static function toJalali(int $year, int $month, int $day): array
     {
-        if ($month < 1 || $month > 12 || $day < 1 || $day > 31) {
+        if (!self::isValidGregorian($year, $month, $day)) {
             throw new \InvalidArgumentException('تاریخ میلادی نامعتبر است.');
         }
 
@@ -73,6 +79,13 @@ final class JalaliDate
     private static function isGregorianLeapYear(int $year): bool
     {
         return $year % 4 === 0 && ($year % 100 !== 0 || $year % 400 === 0);
+    }
+
+    private static function daysInGregorianMonth(int $year, int $month): int
+    {
+        if ($month < 1 || $month > 12) return 0;
+        if ($month === 2) return self::isGregorianLeapYear($year) ? 29 : 28;
+        return in_array($month, [4, 6, 9, 11], true) ? 30 : 31;
     }
 
     private static function gregorianToJd(int $year, int $month, int $day): float
