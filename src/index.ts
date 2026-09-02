@@ -2,6 +2,9 @@ export { JalaliCore } from './core/jalali-core';
 export type { JalaliDateValue, GregorianDateValue } from './core/jalali-core';
 export { JalaliConverter } from './core/converter';
 
+export { KeyboardDateNavigator } from './accessibility/KeyboardDateNavigator';
+export type { CalendarNavigationKey } from './accessibility/KeyboardDateNavigator';
+
 export { JalaliCalendar } from './calendar/JalaliCalendar';
 export { CalendarRenderer } from './calendar/CalendarRenderer';
 export { InteractiveCalendar } from './calendar/InteractiveCalendar';
@@ -24,6 +27,11 @@ export type {
   IranHolidayProviderOptions,
   MovableIranHoliday,
 } from './enterprise/holidays/IranHolidayProvider';
+export { AnnualHolidayDataset } from './enterprise/holidays/AnnualHolidayDataset';
+export type {
+  AnnualHolidayDatasetPayload,
+  HolidayDatasetSource,
+} from './enterprise/holidays/AnnualHolidayDataset';
 export { DayStatusEngine } from './enterprise/DayStatusEngine';
 export { WorkflowTimeline } from './enterprise/WorkflowTimeline';
 
