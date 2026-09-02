@@ -1,3 +1,4 @@
+import { ThemeManager, type WebtananThemeName } from '../theme/ThemeManager';
 import { WebtananDatePicker, type WebtananDatePickerOptions } from '../ui/WebtananDatePicker';
 
 const HTMLElementBase: typeof HTMLElement =
@@ -16,6 +17,7 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
       'min-date',
       'max-date',
       'persian-digits',
+      'theme',
     ];
   }
 
@@ -53,6 +55,16 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
 
   set value(value: string) {
     this.setAttribute('value', value);
+  }
+
+  get theme(): WebtananThemeName {
+    const raw = this.getAttribute('theme');
+    return raw && ThemeManager.isValid(raw) ? raw : ThemeManager.defaultTheme;
+  }
+
+  set theme(value: WebtananThemeName) {
+    ThemeManager.get(value);
+    this.setAttribute('theme', value);
   }
 
   clear(): void {
@@ -110,7 +122,8 @@ export class WebtananJalaliDatePickerElement extends HTMLElementBase {
       }
     }
 
-    this.picker.open(this);
+    const root = this.picker.open(this);
+    if (root) ThemeManager.apply(root, this.theme);
     this.addEventListener('webtanan-date-change', this.forwardChange as EventListener);
   }
 
