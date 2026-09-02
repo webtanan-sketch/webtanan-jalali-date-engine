@@ -13,6 +13,17 @@ export type { TimeValue, TimeSelectorOptions } from './time/TimeSelector';
 
 export { EventEngine } from './enterprise/EventEngine';
 export { HolidayEngine } from './enterprise/HolidayEngine';
+export type {
+  Holiday,
+  HolidayProvider,
+  HolidaySource,
+  HolidayType,
+} from './enterprise/HolidayEngine';
+export { IranHolidayProvider, IRAN_FIXED_SOLAR_HOLIDAYS } from './enterprise/holidays/IranHolidayProvider';
+export type {
+  IranHolidayProviderOptions,
+  MovableIranHoliday,
+} from './enterprise/holidays/IranHolidayProvider';
 export { DayStatusEngine } from './enterprise/DayStatusEngine';
 export { WorkflowTimeline } from './enterprise/WorkflowTimeline';
 
