@@ -57,19 +57,33 @@
 - JalaliValidator برای PHP با پشتیبانی اعداد فارسی و عربی
 - JalaliDateRule برای Validation لاراول
 - اعتبارسنجی واقعی روزهای ماه میلادی در TypeScript و PHP
-- رد تاریخ‌هایی مانند 2026-02-31
 - DatabaseStorageAdapter با Driver تزریقی
 - RestStorageAdapter با GET/PUT/DELETE و Fetch قابل تزریق
 - Web Component مستقل `webtanan-jalali-date-picker`
 - import امن Web Component در Node و محیط‌های بدون DOM
 - Performance/Stress Test برای هزاران تبدیل رفت‌وبرگشت
+- ۱۵ Test Suite و ۴۷ تست موفق
+
+## v0.8.0 — Accessibility, Backend Stores & Official Calendar Core
+- KeyboardDateNavigator برای Arrow / PageUp / PageDown / Home / End
+- اتصال Keyboard Navigation به DatePicker و پشتیبانی Escape
+- ARIA roles و وضعیت‌های `aria-selected`، `aria-disabled` و `aria-current`
+- PdoCalendarStateStore برای SQLite/MySQL/PostgreSQL از طریق PDO
+- LaravelCacheStateStore برای ذخیره State در Cache لاراول
+- AnnualHolidayDataset با metadata منبع، سال و تاریخ تأیید
+- اصلاح هسته تبدیل TypeScript و PHP با الگوریتم مبتنی بر نقاط شکست تقویم رسمی جلالی
+- اصلاح مرز کبیسه ۱۴۰۳/۱۴۰۴ و جلوگیری از پذیرش ۱۴۰۴/۱۲/۳۰
+- Regression Test برای ۱۳۹۹، ۱۴۰۳، ۱۴۰۴ و ۱۴۰۵
+- Performance، Web Component، Persistence، REST/Database و Workflowها هم‌زمان تست می‌شوند
+- ۱۷ Test Suite و ۵۸ تست موفق در checkpoint پایدار v0.8
 
 ## برنامه مسیر بعد
-### v0.8.x
-- دیتاست سالانه تعطیلات متحرک با منبع مشخص
-- Adapterهای نمونه SQL و Laravel Cache
-- Accessibility و Keyboard Navigation کامل
-- Demoهای اجرایی Web Component و Laravel
+### v0.9.x
+- انتخاب Range واقعی با تعامل کاربر
+- Multiple Selection داخل خود DatePicker
+- Disabled Dates و Policyهای قابل تزریق
+- نمایش Holiday و Day Status در UI
+- بهبود Roving Tabindex و Focus Management
 
 ### v1.0.0
 - API پایدار
