@@ -1,3 +1,4 @@
+import { KeyboardDateNavigator, type CalendarNavigationKey } from '../accessibility/KeyboardDateNavigator';
 import { CalendarRenderer } from '../calendar/CalendarRenderer';
 import { JalaliConverter } from '../core/converter';
 import { TimeSelector, type TimeValue } from '../time/TimeSelector';
@@ -48,6 +49,16 @@ const parseJalali = (value: string) => {
 };
 
 const formatValue = (value: string): string => JalaliConverter.format(parseJalali(value));
+const NAVIGATION_KEYS: CalendarNavigationKey[] = [
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowUp',
+  'ArrowDown',
+  'PageUp',
+  'PageDown',
+  'Home',
+  'End',
+];
 
 export class WebtananDatePicker {
   private options: WebtananDatePickerOptions;
@@ -94,8 +105,10 @@ export class WebtananDatePicker {
     const root = document.createElement('section');
     root.className = 'webtanan-calendar';
     root.dir = this.options.rtl ? 'rtl' : 'ltr';
+    root.tabIndex = -1;
     root.setAttribute('role', 'dialog');
     root.setAttribute('aria-label', 'انتخاب تاریخ شمسی');
+    root.addEventListener('keydown', this.handleKeyDown);
     this.root = root;
 
     (host ?? document.body).appendChild(root);
@@ -104,6 +117,7 @@ export class WebtananDatePicker {
   }
 
   close(): void {
+    this.root?.removeEventListener('keydown', this.handleKeyDown);
     this.root?.remove();
     this.root = null;
   }
@@ -111,11 +125,7 @@ export class WebtananDatePicker {
   setDate(date: string): void {
     const normalized = formatValue(date);
     this.assertWithinBounds(normalized);
-    this.selectedDate = normalized;
-    const parsed = parseJalali(normalized);
-    this.viewYear = parsed.year;
-    this.viewMonth = parsed.month;
-    this.render();
+    this.applySelectedDate(normalized, false);
   }
 
   getDate(): string | null {
@@ -256,6 +266,52 @@ export class WebtananDatePicker {
     this.render();
   }
 
+  private applySelectedDate(date: string, emit: boolean): void {
+    this.selectedDate = date;
+    const parsed = parseJalali(date);
+    this.viewYear = parsed.year;
+    this.viewMonth = parsed.month;
+    if (emit) this.dispatchChange();
+    this.render();
+  }
+
+  private focusDate(date: string): void {
+    if (!this.root) return;
+    const button = this.root.querySelector<HTMLButtonElement>(`button[data-date="${date}"]`);
+    button?.focus();
+  }
+
+  private handleKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.close();
+      return;
+    }
+
+    const target = event.target;
+    if (target instanceof HTMLSelectElement || target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+      return;
+    }
+
+    if (!NAVIGATION_KEYS.includes(event.key as CalendarNavigationKey)) return;
+    event.preventDefault();
+
+    const base = this.selectedDate
+      ? parseJalali(this.selectedDate)
+      : { year: this.viewYear, month: this.viewMonth, day: 1 };
+    const next = KeyboardDateNavigator.navigate(base, event.key as CalendarNavigationKey, this.options.rtl);
+    const normalized = JalaliConverter.format(next);
+
+    try {
+      this.assertWithinBounds(normalized);
+    } catch {
+      return;
+    }
+
+    this.applySelectedDate(normalized, true);
+    this.focusDate(normalized);
+  };
+
   private assertWithinBounds(date: string): void {
     if (this.options.minDate && date < formatValue(this.options.minDate)) {
       throw new RangeError('تاریخ انتخابی قبل از حداقل تاریخ مجاز است.');
@@ -346,6 +402,7 @@ export class WebtananDatePicker {
     if (!this.root || typeof document === 'undefined') return;
 
     const view = this.renderer.render(this.viewYear, this.viewMonth);
+    const today = JalaliConverter.format(JalaliConverter.fromGregorianDate(new Date()));
     this.root.replaceChildren();
 
     const header = document.createElement('header');
@@ -360,6 +417,7 @@ export class WebtananDatePicker {
 
     const title = document.createElement('strong');
     title.className = 'webtanan-calendar__title';
+    title.setAttribute('aria-live', 'polite');
     title.textContent = `${view.monthName} ${this.displayNumber(view.year)}`;
 
     const next = document.createElement('button');
@@ -373,6 +431,7 @@ export class WebtananDatePicker {
 
     const weekdays = document.createElement('div');
     weekdays.className = 'webtanan-calendar__weekdays';
+    weekdays.setAttribute('aria-hidden', 'true');
     for (const weekday of view.weekDays) {
       const item = document.createElement('span');
       item.textContent = weekday;
@@ -381,11 +440,15 @@ export class WebtananDatePicker {
 
     const days = document.createElement('div');
     days.className = 'webtanan-calendar__days';
+    days.setAttribute('role', 'grid');
+    days.setAttribute('aria-label', `${view.monthName} ${view.year}`);
 
+    let focusAssigned = false;
     for (const cell of view.cells) {
       if (!cell.date || cell.day === null) {
         const empty = document.createElement('span');
         empty.className = 'webtanan-calendar__day is-empty';
+        empty.setAttribute('role', 'presentation');
         days.appendChild(empty);
         continue;
       }
@@ -394,26 +457,48 @@ export class WebtananDatePicker {
       button.type = 'button';
       button.className = 'webtanan-calendar__day';
       button.dataset.date = cell.date;
+      button.setAttribute('role', 'gridcell');
       button.textContent = this.displayNumber(cell.day);
 
-      if (cell.date === this.selectedDate) button.classList.add('is-selected');
+      const selected = cell.date === this.selectedDate;
+      button.setAttribute('aria-selected', selected ? 'true' : 'false');
+      if (selected) button.classList.add('is-selected');
+      if (cell.date === today) button.setAttribute('aria-current', 'date');
+
       if (this.selectedRange && cell.date >= this.selectedRange.start && cell.date <= this.selectedRange.end) {
         button.classList.add('is-in-range');
       }
-      if (this.events.has(cell.date)) {
+
+      const eventTitles = this.events.get(cell.date)?.map((event) => event.title) ?? [];
+      if (eventTitles.length > 0) {
         button.classList.add('has-event');
-        button.title = this.events.get(cell.date)?.map((event) => event.title).join('، ') ?? '';
+        button.title = eventTitles.join('، ');
       }
+
+      button.setAttribute(
+        'aria-label',
+        `${this.displayNumber(cell.day)} ${view.monthName} ${this.displayNumber(view.year)}${
+          eventTitles.length ? `، ${eventTitles.join('، ')}` : ''
+        }`,
+      );
 
       const disabled =
         (this.options.minDate ? cell.date < formatValue(this.options.minDate) : false) ||
         (this.options.maxDate ? cell.date > formatValue(this.options.maxDate) : false);
       button.disabled = disabled;
+      button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+
+      const preferredFocus = selected || (!this.selectedDate && cell.date === today);
+      if (!disabled && (preferredFocus || !focusAssigned)) {
+        button.tabIndex = 0;
+        focusAssigned = true;
+      } else {
+        button.tabIndex = -1;
+      }
 
       button.addEventListener('click', () => {
-        this.selectedDate = cell.date;
-        this.dispatchChange();
-        this.render();
+        this.applySelectedDate(cell.date as string, true);
+        this.focusDate(cell.date as string);
       });
 
       days.appendChild(button);
