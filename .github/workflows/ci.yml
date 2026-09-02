@@ -1,0 +1,45 @@
+name: Webtanan Jalali CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - name: دریافت کد
+        uses: actions/checkout@v4
+
+      - name: راه‌اندازی Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: نصب وابستگی‌ها
+        run: npm install
+
+      - name: اجرای تست، typecheck و build
+        run: npm run test:ci
+
+  php:
+    runs-on: ubuntu-latest
+    steps:
+      - name: دریافت کد
+        uses: actions/checkout@v4
+
+      - name: راه‌اندازی PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+
+      - name: بررسی composer.json
+        run: composer validate --strict
+
+      - name: بررسی Syntax فایل‌های PHP
+        run: find php/src -name '*.php' -print0 | xargs -0 -n1 php -l
