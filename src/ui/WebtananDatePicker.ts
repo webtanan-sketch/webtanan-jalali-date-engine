@@ -3,6 +3,7 @@ import { CalendarRenderer } from '../calendar/CalendarRenderer';
 import { JalaliConverter } from '../core/converter';
 import { DayStatusEngine, type DayStatus } from '../enterprise/DayStatusEngine';
 import { HolidayEngine, type Holiday } from '../enterprise/HolidayEngine';
+import { ThemeManager, type WebtananThemeName } from '../theme/ThemeManager';
 import { TimeSelector, type TimeValue } from '../time/TimeSelector';
 import { PersianDigits } from '../utils/PersianDigits';
 
@@ -16,6 +17,7 @@ export interface WebtananDatePickerOptions {
   multiple: boolean;
   events: boolean;
   holidays: boolean;
+  theme: WebtananThemeName;
   minuteStep: number;
   secondStep: number;
   minDate?: string;
@@ -98,11 +100,16 @@ export class WebtananDatePicker {
       multiple: false,
       events: true,
       holidays: true,
+      theme: ThemeManager.defaultTheme,
       minuteStep: 15,
       secondStep: 1,
       disabledDates: [],
       ...options,
     };
+
+    if (!ThemeManager.isValid(this.options.theme)) {
+      throw new RangeError(`تم ناشناخته است: ${this.options.theme}`);
+    }
 
     if (this.options.range && this.options.multiple) {
       throw new Error('حالت range و multiple نمی‌توانند هم‌زمان فعال باشند.');
@@ -138,6 +145,7 @@ export class WebtananDatePicker {
     root.setAttribute('role', 'dialog');
     root.setAttribute('aria-label', 'انتخاب تاریخ شمسی');
     root.addEventListener('keydown', this.handleKeyDown);
+    ThemeManager.apply(root, this.options.theme);
     this.root = root;
     (host ?? document.body).appendChild(root);
     this.render();
@@ -148,6 +156,16 @@ export class WebtananDatePicker {
     this.root?.removeEventListener('keydown', this.handleKeyDown);
     this.root?.remove();
     this.root = null;
+  }
+
+  setTheme(theme: WebtananThemeName): void {
+    if (!ThemeManager.isValid(theme)) throw new RangeError(`تم ناشناخته است: ${theme}`);
+    this.options.theme = theme;
+    if (this.root) ThemeManager.apply(this.root, theme);
+  }
+
+  getTheme(): WebtananThemeName {
+    return this.options.theme;
   }
 
   setDate(date: string): void {
@@ -560,6 +578,7 @@ export class WebtananDatePicker {
     const view = this.renderer.render(this.viewYear, this.viewMonth);
     const today = JalaliConverter.format(JalaliConverter.fromGregorianDate(new Date()));
     this.root.replaceChildren();
+    ThemeManager.apply(this.root, this.options.theme);
 
     const header = document.createElement('header');
     header.className = 'webtanan-calendar__header';
