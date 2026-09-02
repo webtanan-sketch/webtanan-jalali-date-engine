@@ -34,6 +34,11 @@ export type {
   AnnualHolidayDatasetPayload,
   HolidayDatasetSource,
 } from './enterprise/holidays/AnnualHolidayDataset';
+export { HolidayDatasetLoader } from './enterprise/holidays/HolidayDatasetLoader';
+export type {
+  HolidayDatasetFetch,
+  HolidayDatasetFetchResponse,
+} from './enterprise/holidays/HolidayDatasetLoader';
 export {
   IRAN_OFFICIAL_HOLIDAYS_1404,
   IRAN_OFFICIAL_HOLIDAYS_1405,
