@@ -1,4 +1,4 @@
-import { WebtananDatePicker } from '../src/ui/WebtananDatePicker';
+import { WebtananDatePicker, type WebtananDatePickerState } from '../src/ui/WebtananDatePicker';
 import { MemoryStorageAdapter } from '../src/storage/StorageAdapter';
 import { JsonRepository } from '../src/storage/JsonRepository';
 import { DatePickerPersistence } from '../src/storage/DatePickerPersistence';
@@ -6,7 +6,7 @@ import { DatePickerPersistence } from '../src/storage/DatePickerPersistence';
 describe('DatePickerPersistence', () => {
   test('تاریخ، زمان، بازه و رویدادها را ذخیره و بازیابی می‌کند', async () => {
     const storage = new MemoryStorageAdapter();
-    const repository = new JsonRepository(storage, 'calendar');
+    const repository = new JsonRepository<WebtananDatePickerState>(storage, 'calendar');
 
     const source = new WebtananDatePicker({ time: true, range: true });
     source.setDate('1405/06/11');
@@ -28,7 +28,7 @@ describe('DatePickerPersistence', () => {
   });
 
   test('وقتی داده‌ای وجود ندارد restore برابر false است', async () => {
-    const repository = new JsonRepository(new MemoryStorageAdapter(), 'missing');
+    const repository = new JsonRepository<WebtananDatePickerState>(new MemoryStorageAdapter(), 'missing');
     const persistence = new DatePickerPersistence(new WebtananDatePicker(), repository);
     expect(await persistence.restore()).toBe(false);
   });
@@ -36,7 +36,7 @@ describe('DatePickerPersistence', () => {
   test('schema ناسازگار شناسایی می‌شود', async () => {
     const storage = new MemoryStorageAdapter();
     storage.setItem('calendar', JSON.stringify({ schema: 'old/v0', savedAt: '', data: {} }));
-    const repository = new JsonRepository(storage, 'calendar');
+    const repository = new JsonRepository<WebtananDatePickerState>(storage, 'calendar');
     await expect(repository.load()).rejects.toThrow();
   });
 });
