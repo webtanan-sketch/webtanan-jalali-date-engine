@@ -25,6 +25,24 @@ describe('WebtananDatePicker API', () => {
     expect(() => picker.setRange('1405/06/20', '1405/06/01')).toThrow();
   });
 
+  test('Date + Time با گام ۱۵ دقیقه خروجی استاندارد می‌دهد', () => {
+    const picker = new WebtananDatePicker({ time: true, minuteStep: 15 });
+    picker.setDate('1405/06/11');
+    picker.setTime(14, 30);
+
+    expect(picker.getTime()).toEqual({ hour: 14, minute: 30, second: 0 });
+    expect(picker.getFormattedTime()).toBe('14:30');
+    expect(picker.getDateTime()).toBe('1405/06/11 14:30');
+    expect(() => picker.setTime(14, 22)).toThrow();
+  });
+
+  test('نمایش ثانیه در صورت فعال بودن پشتیبانی می‌شود', () => {
+    const picker = new WebtananDatePicker({ time: true, seconds: true, minuteStep: 5, secondStep: 5 });
+    picker.setDate('1405/06/11');
+    picker.setTime(8, 15, 25);
+    expect(picker.getDateTime()).toBe('1405/06/11 08:15:25');
+  });
+
   test('رویدادهای یک تاریخ مستقل نگهداری می‌شوند', () => {
     const picker = new WebtananDatePicker({ events: true });
     picker.addEvent({ date: '1405/06/11', title: 'جلسه' });
@@ -33,6 +51,18 @@ describe('WebtananDatePicker API', () => {
 
     expect(picker.getEvents('1405/06/11')).toHaveLength(2);
     expect(picker.getEvents('1405/06/12')).toHaveLength(1);
+  });
+
+  test('clear تاریخ، بازه و زمان را پاک می‌کند', () => {
+    const picker = new WebtananDatePicker({ time: true, range: true });
+    picker.setDate('1405/06/11');
+    picker.setRange('1405/06/01', '1405/06/20');
+    picker.setTime(9, 15);
+    picker.clear();
+
+    expect(picker.getDate()).toBeNull();
+    expect(picker.getRange()).toBeNull();
+    expect(picker.getTime()).toBeNull();
   });
 
   test('در محیط Node بدون DOM، open به‌صورت امن null برمی‌گرداند', () => {
