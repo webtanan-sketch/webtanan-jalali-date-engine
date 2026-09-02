@@ -1,7 +1,7 @@
 import { JalaliConverter } from '../core/converter';
 
 export type HolidayType = 'official' | 'company';
-export type HolidaySource = 'fixed-solar' | 'movable' | 'company' | 'custom';
+export type HolidaySource = 'fixed-solar' | 'movable' | 'annual-dataset' | 'company' | 'custom';
 
 export interface Holiday {
   date: string;
