@@ -11,12 +11,14 @@ describe('AnnualHolidayDataset', () => {
         verifiedAt: '2026-09-02',
       },
       holidays: [
-        { date: '1405/02/01', title: 'تعطیلی نمونه', type: 'official', source: 'annual-dataset' },
+        { date: '1405/02/01', title: 'تعطیلی نمونه', type: 'official', source: 'movable' },
       ],
     });
 
     expect(dataset.name).toBe('iran-annual-1405');
-    expect(dataset.getHolidays()).toHaveLength(1);
+    expect(dataset.version).toBe('1');
+    expect(dataset.getHolidays(1405)).toHaveLength(1);
+    expect(dataset.getHolidays(1404)).toHaveLength(0);
     expect(AnnualHolidayDataset.fromJSON(JSON.stringify(dataset.toJSON())).year).toBe(1405);
   });
 
@@ -26,7 +28,7 @@ describe('AnnualHolidayDataset', () => {
       year: 1405,
       source: { title: 'منبع', verifiedAt: '2026-09-02' },
       holidays: [
-        { date: '1404/12/29', title: 'اشتباه', type: 'official', source: 'annual-dataset' },
+        { date: '1404/12/29', title: 'اشتباه', type: 'official', source: 'movable' },
       ],
     })).toThrow('خارج از سال');
   });
@@ -37,8 +39,8 @@ describe('AnnualHolidayDataset', () => {
       year: 1405,
       source: { title: 'منبع', verifiedAt: '2026-09-02' },
       holidays: [
-        { date: '1405/03/10', title: 'نمونه', type: 'official', source: 'annual-dataset' },
-        { date: '1405/03/10', title: 'نمونه', type: 'official', source: 'annual-dataset' },
+        { date: '1405/03/10', title: 'نمونه', type: 'official', source: 'movable' },
+        { date: '1405/03/10', title: 'نمونه', type: 'official', source: 'movable' },
       ],
     })).toThrow('تکراری');
   });
