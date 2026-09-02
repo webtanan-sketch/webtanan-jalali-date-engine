@@ -8,6 +8,9 @@ export { InteractiveCalendar } from './calendar/InteractiveCalendar';
 export { RangeSelector } from './calendar/RangeSelector';
 export { MultiDateSelector } from './calendar/MultiDateSelector';
 
+export { TimeSelector } from './time/TimeSelector';
+export type { TimeValue, TimeSelectorOptions } from './time/TimeSelector';
+
 export { EventEngine } from './enterprise/EventEngine';
 export { HolidayEngine } from './enterprise/HolidayEngine';
 export { DayStatusEngine } from './enterprise/DayStatusEngine';
