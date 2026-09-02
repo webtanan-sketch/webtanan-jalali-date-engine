@@ -9,6 +9,18 @@ const mod = (a: number, b: number): number => a - b * Math.floor(a / b);
 const isGregorianLeapYear = (year: number): boolean =>
   year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
 
+const daysInGregorianMonth = (year: number, month: number): number => {
+  if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) return 0;
+  if (month === 2) return isGregorianLeapYear(year) ? 29 : 28;
+  return [4, 6, 9, 11].includes(month) ? 30 : 31;
+};
+
+const isValidGregorian = (date: GregorianDateValue): boolean => {
+  if (!Number.isInteger(date.year) || !Number.isInteger(date.month) || !Number.isInteger(date.day)) return false;
+  const max = daysInGregorianMonth(date.year, date.month);
+  return max > 0 && date.day >= 1 && date.day <= max;
+};
+
 const gregorianToJd = ({ year, month, day }: GregorianDateValue): number => {
   const adjustment = month <= 2 ? 0 : isGregorianLeapYear(year) ? -1 : -2;
   return (
@@ -108,6 +120,10 @@ export const JalaliConverter = {
     return max > 0 && date.day >= 1 && date.day <= max;
   },
 
+  isValidGregorian(date: GregorianDateValue): boolean {
+    return isValidGregorian(date);
+  },
+
   format(date: JalaliDateValue, separator = '/'): string {
     if (!this.isValid(date)) throw new RangeError('تاریخ شمسی نامعتبر است.');
     return `${String(date.year).padStart(4, '0')}${separator}${String(date.month).padStart(2, '0')}${separator}${String(date.day).padStart(2, '0')}`;
@@ -124,13 +140,14 @@ export const JalaliConverter = {
   },
 
   toJalali(date: GregorianDateValue): JalaliDateValue {
-    if (date.month < 1 || date.month > 12 || date.day < 1 || date.day > 31) {
+    if (!isValidGregorian(date)) {
       throw new RangeError('تاریخ میلادی نامعتبر است.');
     }
     return jdToJalali(gregorianToJd(date));
   },
 
   fromGregorianDate(date: Date): JalaliDateValue {
+    if (Number.isNaN(date.getTime())) throw new RangeError('شیء Date نامعتبر است.');
     return this.toJalali({
       year: date.getUTCFullYear(),
       month: date.getUTCMonth() + 1,
