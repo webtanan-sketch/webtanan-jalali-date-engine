@@ -1,72 +1,65 @@
 # Webtanan Jalali Date Engine
 
-## موتور تاریخ شمسی حرفه‌ای صنعتی
+## موتور حرفه‌ای تاریخ شمسی برای نرم‌افزارهای سازمانی
 
-A professional Persian (Jalali/Shamsi) date and time engine designed for enterprise applications including CRM, accounting, sales, production management, scheduling systems and business software.
+یک کامپوننت صنعتی و حرفه‌ای برای مدیریت تاریخ، زمان، رویداد و گردش کاری در نرم‌افزارهای فارسی.
 
-## Vision
-
-Webtanan Jalali Date Engine is not a simple calendar picker. It is designed as an enterprise-grade date management component with:
-
-- Jalali calendar support
-- Date and time selection
-- Range selection
-- Multiple date selection
-- Event management
-- Work calendar support
-- Holiday management
-- Workflow timeline support
-- CRM and sales integration capabilities
-- Reporting-ready data structure
+هدف این پروژه ساخت یک Date Picker ساده نیست؛ هدف ایجاد یک موتور کامل مدیریت زمان برای CRM، فروش، حسابداری، تولید، سفارش و سیستم‌های مدیریتی است.
 
 ---
 
-# Main Features
+# امکانات اصلی
 
-## Calendar Engine
+## هسته تقویم شمسی
 
-- Accurate Jalali calendar calculation
-- Gregorian ↔ Jalali conversion
-- Leap year testing
-- Persian digit support
-- RTL native design
+- محاسبه دقیق تاریخ جلالی
+- تبدیل شمسی به میلادی و برعکس
+- پشتیبانی سال کبیسه
+- اعتبارسنجی تاریخ
+- اعداد فارسی
+- پشتیبانی کامل RTL
 
-## Date Selection
+## انتخاب تاریخ
 
-- Single date
-- Date range
-- Multiple dates
-- Minimum and maximum date limitation
-- Disabled dates
+- انتخاب یک تاریخ
+- انتخاب بازه زمانی
+- انتخاب چند تاریخ
+- محدودیت حداقل و حداکثر تاریخ
+- غیرفعال کردن روزهای غیرمجاز
 
-## Time Picker
+## انتخاب ساعت
 
-Support for:
+پشتیبانی از:
 
-- Hour
-- Minute
-- Second
-- Custom time interval
+- ساعت
+- دقیقه
+- ثانیه
+- گام زمانی دلخواه
 
-Example:
+نمونه:
 
 08:00
 08:15
 08:30
 
-## Enterprise Events
+---
 
-Each date can contain business events:
+# سیستم رویداد سازمانی
 
-- Customer calls
-- Meetings
-- Delivery schedules
-- Payments
-- Follow-ups
+هر تاریخ می‌تواند شامل رویداد باشد:
 
-## Workflow Timeline
+- تماس مشتری
+- جلسه
+- تحویل سفارش
+- پرداخت
+- پیگیری فروش
+- برنامه تولید
 
-Designed for business processes:
+---
+
+# نمایش مسیر پیشرفت کار
+
+مناسب برای فرآیندهای سازمانی:
 
 ```
 ثبت سفارش
@@ -76,138 +69,106 @@ Designed for business processes:
 
 ---
 
-# UI Principles
+# طراحی رابط کاربری
 
-- Persian RTL interface
-- Minimal industrial design
-- Professional management software style
-- Responsive layout
-- Mobile friendly
-- No unnecessary complexity
+اصول طراحی:
+
+- کاملاً فارسی
+- راست‌چین
+- مینیمال
+- صنعتی
+- مناسب مدیران و پرسنل
+- بدون پیچیدگی
+- Responsive
 
 ---
 
-# Supported Platforms
+# سازگاری
 
-- HTML / JavaScript
+قابل استفاده در:
+
+- JavaScript
 - TypeScript
+- HTML
 - React
 - Vue
 - Electron
-- Desktop applications
+- نرم‌افزارهای دسکتاپ
 
 ---
 
-# API Preview
+# API اصلی
 
 ```javascript
 GFTDatePicker.open()
-
 GFTDatePicker.close()
-
 GFTDatePicker.setDate()
-
 GFTDatePicker.getDate()
-
 GFTDatePicker.setRange()
-
 GFTDatePicker.addEvent()
-
 GFTDatePicker.clear()
 ```
 
 ---
 
-# Configuration Example
+# نسخه‌ها
 
-```javascript
-{
- calendar:"jalali",
- rtl:true,
- persianDigits:true,
- time:true,
- range:true,
- events:true,
- holidays:true
-}
-```
+## v0.1.0 — پایه معماری
 
----
+انجام شده:
 
-# Roadmap & Versions
+- ایجاد ساختار پروژه
+- طراحی هسته اولیه
+- تعریف API عمومی
+- تعریف مدل داده
 
-## v0.1.0 - Foundation Release
+## v0.2.0 — موتور تاریخ شمسی
 
-Initial architecture:
+در حال توسعه:
 
-- Project structure
-- Core calendar engine planning
-- API design
-- Documentation base
+- تبدیل دقیق تاریخ
+- الگوریتم کبیسه
+- تست‌های تاریخ
+- اعتبارسنجی کامل
 
-## v0.2.0 - Jalali Core Engine
+## v0.3.0 — رابط حرفه‌ای تقویم
 
-Planned:
+- طراحی RTL
+- تقویم فارسی
+- انتخاب ماه و سال
+- رابط صنعتی
 
-- Jalali date calculation
-- Gregorian conversion
-- Leap year handling
-- Date validation
+## v0.4.0 — مدیریت زمان و بازه
 
-## v0.3.0 - Professional Date Picker UI
+- تاریخ + ساعت
+- بازه زمانی
+- چند انتخاب
+- محدودیت تاریخ
 
-Planned:
+## v0.5.0 — سیستم رویداد
 
-- RTL interface
-- Persian digits
-- Calendar navigation
-- Responsive design
+- رویدادهای کاری
+- وضعیت روزها
+- یادآوری‌ها
 
-## v0.4.0 - Time & Range Management
+## v0.6.0 — لایه سازمانی
 
-Planned:
+- گردش سفارش
+- CRM
+- فروش
+- تولید
 
-- Date + Time selection
-- Range selection
-- Multiple date selection
-- Restrictions
+## v1.0.0 — نسخه صنعتی پایدار
 
-## v0.5.0 - Event System
-
-Planned:
-
-- Calendar events
-- Status indicators
-- Business reminders
-
-## v0.6.0 - Enterprise Workflow Layer
-
-Planned:
-
-- Timeline visualization
-- Order progress tracking
-- CRM integration models
-
-## v1.0.0 - Industrial Stable Release
-
-Target:
-
-- Production ready
-- Full documentation
-- Demo applications
-- CRM template
-- Sales template
-- Accounting template
-- Production planning template
+- آماده استفاده تجاری
+- مستندات کامل
+- Demo
+- قالب CRM
+- قالب فروش
+- قالب حسابداری
 
 ---
 
-# License
+توسعه داده شده توسط Webtanan
 
-To be announced.
-
----
-
-Developed by Webtanan
-
-Professional Persian Software Components
+کامپوننت‌های حرفه‌ای نرم‌افزار فارسی
