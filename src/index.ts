@@ -34,6 +34,14 @@ export { ProductionWorkflowAdapter } from './integrations/ProductionWorkflowAdap
 
 export { MemoryStorageAdapter, BrowserStorageAdapter } from './storage/StorageAdapter';
 export type { StorageAdapter, BrowserStorageLike } from './storage/StorageAdapter';
+export { DatabaseStorageAdapter } from './storage/DatabaseStorageAdapter';
+export type { DatabaseStorageDriver } from './storage/DatabaseStorageAdapter';
+export { RestStorageAdapter } from './storage/RestStorageAdapter';
+export type {
+  FetchLike,
+  FetchResponseLike,
+  RestStorageAdapterOptions,
+} from './storage/RestStorageAdapter';
 export { JsonRepository } from './storage/JsonRepository';
 export type { StoredEnvelope, JsonRepositoryOptions } from './storage/JsonRepository';
 export { DatePickerPersistence } from './storage/DatePickerPersistence';
@@ -48,3 +56,8 @@ export type {
   WebtananDateRange,
   WebtananDatePickerState,
 } from './ui/WebtananDatePicker';
+
+export {
+  WebtananJalaliDatePickerElement,
+  defineWebtananJalaliDatePicker,
+} from './web-component/WebtananJalaliDatePickerElement';
