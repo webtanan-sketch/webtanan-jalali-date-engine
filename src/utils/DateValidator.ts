@@ -1,7 +1,13 @@
+import { JalaliConverter } from '../core/converter';
+
 export class DateValidator {
-  static validate(year:number, month:number, day:number){
-    if(month < 1 || month > 12) return false;
-    if(day < 1 || day > 31) return false;
-    return year > 0;
+  static validate(year: number, month: number, day: number): boolean {
+    return JalaliConverter.isValid({ year, month, day });
+  }
+
+  static assert(year: number, month: number, day: number): void {
+    if (!this.validate(year, month, day)) {
+      throw new RangeError('تاریخ شمسی نامعتبر است.');
+    }
   }
 }
