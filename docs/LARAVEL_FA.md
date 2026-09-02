@@ -33,6 +33,32 @@ echo JalaliDate::format(1405, 6, 11);
 echo JalaliDate::format(1405, 6, 11);
 ```
 
+## Validation Rule
+
+برای اعتبارسنجی تاریخ شمسی در Form Request یا Validator:
+
+```php
+use Webtanan\JalaliDateEngine\Laravel\JalaliDateRule;
+
+public function rules(): array
+{
+    return [
+        'delivery_date' => ['required', new JalaliDateRule()],
+    ];
+}
+```
+
+Rule اعداد انگلیسی، فارسی و عربی را می‌پذیرد و روز نامعتبر را بر اساس ماه/سال رد می‌کند.
+
+## نرمال‌سازی قبل از ذخیره
+
+```php
+use Webtanan\JalaliDateEngine\JalaliValidator;
+
+$normalized = JalaliValidator::normalize('۱۴۰۵/۶/۱۱');
+// 1405/06/11
+```
+
 ## انتشار تنظیمات
 
 ```bash
@@ -84,7 +110,6 @@ Blade View ساختار ورودی استاندارد را فراهم می‌ک�
 
 ## مسیر بعدی Laravel
 
-- Validation Rule تاریخ شمسی
 - Form Request helpers
 - Cast برای مدل Eloquent
 - API Resource helpers
