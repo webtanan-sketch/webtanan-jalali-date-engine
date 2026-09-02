@@ -24,12 +24,28 @@ $assertSame(
     JalaliDate::toJalali(2026, 9, 2),
     'تبدیل میلادی به شمسی'
 );
+
+$assertSame(true, JalaliDate::isLeapYear(1403), '۱۴۰۳ باید کبیسه باشد');
+$assertSame(false, JalaliDate::isLeapYear(1404), '۱۴۰۴ نباید کبیسه باشد');
+$assertSame('2025-03-20', JalaliDate::toGregorianIso(1403, 12, 30), 'مرز ۱۴۰۳/۱۴۰۴');
+$assertSame('2025-03-21', JalaliDate::toGregorianIso(1404, 1, 1), 'اول فروردین ۱۴۰۴');
+$assertSame(false, JalaliDate::isValid(1404, 12, 30), 'اسفند ۱۴۰۴ روز ۳۰ ندارد');
+$assertSame('2026-03-20', JalaliDate::toGregorianIso(1404, 12, 29), 'آخر اسفند ۱۴۰۴');
+$assertSame(
+    ['year' => 1404, 'month' => 12, 'day' => 29],
+    JalaliDate::toJalali(2026, 3, 20),
+    '۲۰ مارس ۲۰۲۶ برابر ۲۹ اسفند ۱۴۰۴'
+);
+$assertSame(true, JalaliDate::isLeapYear(1399), '۱۳۹۹ باید کبیسه باشد');
+$assertSame('2021-03-20', JalaliDate::toGregorianIso(1399, 12, 30), 'مرز سال ۱۳۹۹');
+
 $assertSame(false, JalaliDate::isValid(1405, 7, 31), 'اعتبارسنجی روز شمسی نامعتبر');
 $assertSame(false, JalaliDate::isValidGregorian(2026, 2, 29), 'فوریه نامعتبر در سال غیرکبیسه');
 $assertSame(true, JalaliDate::isValidGregorian(2028, 2, 29), 'فوریه معتبر در سال کبیسه');
 $assertSame(true, JalaliValidator::isValidString('۱۴۰۵/۰۶/۱۱'), 'پذیرش اعداد فارسی');
 $assertSame('1405/06/11', JalaliValidator::normalize('۱۴۰۵/۶/۱۱'), 'نرمال‌سازی تاریخ فارسی');
 $assertSame(null, JalaliValidator::normalize('1405/07/31'), 'رد تاریخ شمسی نامعتبر');
+$assertSame(null, JalaliValidator::normalize('1404/12/30'), 'رد اسفند ۳۰ در سال غیرکبیسه');
 
 if (in_array('sqlite', PDO::getAvailableDrivers(), true)) {
     $pdo = new PDO('sqlite::memory:');
