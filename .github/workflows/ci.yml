@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: webtanan-jalali-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   javascript:
     runs-on: ubuntu-latest
@@ -19,7 +23,7 @@ jobs:
           node-version: '24'
 
       - name: نصب وابستگی‌ها
-        run: npm install
+        run: npm install --ignore-scripts
 
       - name: اجرای تست، typecheck و build
         run: npm run test:ci
