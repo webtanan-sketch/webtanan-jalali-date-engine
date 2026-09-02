@@ -54,6 +54,10 @@ const parseJalali = (value: string) => {
 };
 
 const formatValue = (value: string): string => JalaliConverter.format(parseJalali(value));
+const lastSorted = (values: Iterable<string>): string | null => {
+  const sorted = [...values].sort();
+  return sorted.length ? sorted[sorted.length - 1] : null;
+};
 const NAVIGATION_KEYS: CalendarNavigationKey[] = [
   'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End',
 ];
@@ -185,7 +189,7 @@ export class WebtananDatePicker {
       next.add(normalized);
     }
     this.selectedDates = next;
-    this.selectedDate = [...next].sort().at(-1) ?? null;
+    this.selectedDate = lastSorted(next);
     this.render();
   }
 
@@ -198,7 +202,7 @@ export class WebtananDatePicker {
     this.assertDateAllowed(normalized);
     if (this.selectedDates.has(normalized)) {
       this.selectedDates.delete(normalized);
-      if (this.selectedDate === normalized) this.selectedDate = [...this.selectedDates].sort().at(-1) ?? null;
+      if (this.selectedDate === normalized) this.selectedDate = lastSorted(this.selectedDates);
       this.render();
       return false;
     }
@@ -226,7 +230,9 @@ export class WebtananDatePicker {
 
   isDateDisabled(date: string): boolean {
     const normalized = formatValue(date);
-    return this.isOutsideBounds(normalized) || this.disabledDates.has(normalized);
+    return this.isOutsideBounds(normalized)
+      || this.disabledDates.has(normalized)
+      || this.dayStatusEngine?.get(normalized) === 'closed';
   }
 
   setHolidayEngine(engine: HolidayEngine | null): void {
@@ -241,6 +247,7 @@ export class WebtananDatePicker {
 
   setDayStatusEngine(engine: DayStatusEngine | null): void {
     this.dayStatusEngine = engine;
+    this.dropDisabledSelections();
     this.render();
   }
 
@@ -319,7 +326,7 @@ export class WebtananDatePicker {
     this.rangeAnchor = null;
     this.events = nextEvents;
 
-    const focusDate = nextDate ?? nextRange?.start ?? [...nextDates].sort().at(-1) ?? null;
+    const focusDate = nextDate ?? nextRange?.start ?? lastSorted(nextDates);
     if (focusDate) {
       const parsed = parseJalali(focusDate);
       this.viewYear = parsed.year;
@@ -368,9 +375,13 @@ export class WebtananDatePicker {
     this.assertDateAllowed(date);
 
     if (this.options.multiple) {
-      if (this.selectedDates.has(date)) this.selectedDates.delete(date);
-      else this.selectedDates.add(date);
-      this.selectedDate = date;
+      if (this.selectedDates.has(date)) {
+        this.selectedDates.delete(date);
+        this.selectedDate = lastSorted(this.selectedDates);
+      } else {
+        this.selectedDates.add(date);
+        this.selectedDate = date;
+      }
       this.dispatchChange();
       this.render();
       return;
@@ -405,6 +416,8 @@ export class WebtananDatePicker {
     if (this.selectedRange) {
       try {
         this.assertRangeHasNoDisabledDate(this.selectedRange.start, this.selectedRange.end);
+        this.assertDateAllowed(this.selectedRange.start);
+        this.assertDateAllowed(this.selectedRange.end);
       } catch {
         this.selectedRange = null;
         this.rangeAnchor = null;
@@ -421,13 +434,21 @@ export class WebtananDatePicker {
   private assertDateAllowed(date: string): void {
     if (this.isOutsideBounds(date)) throw new RangeError('تاریخ انتخابی خارج از محدوده مجاز است.');
     if (this.disabledDates.has(date)) throw new RangeError('تاریخ انتخابی غیرفعال است.');
+    if (this.dayStatusEngine?.get(date) === 'closed') throw new RangeError('روز انتخابی بسته است.');
   }
 
   private assertRangeHasNoDisabledDate(start: string, end: string): void {
-    if (!this.disabledDates.size) return;
     for (const disabled of this.disabledDates) {
-      if (disabled >= start && disabled <= end) {
-        throw new RangeError(`بازه شامل تاریخ غیرفعال ${disabled} است.`);
+      if (disabled >= start && disabled <= end) throw new RangeError(`بازه شامل تاریخ غیرفعال ${disabled} است.`);
+    }
+    if (this.dayStatusEngine) {
+      let cursor = parseJalali(start);
+      const endValue = end;
+      while (true) {
+        const value = JalaliConverter.format(cursor);
+        if (this.dayStatusEngine.get(value) === 'closed') throw new RangeError(`بازه شامل روز بسته ${value} است.`);
+        if (value === endValue) break;
+        cursor = KeyboardDateNavigator.addDays(cursor, 1);
       }
     }
   }
@@ -443,7 +464,6 @@ export class WebtananDatePicker {
       this.close();
       return;
     }
-
     const target = event.target;
     if (target instanceof HTMLSelectElement || target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
     if (!NAVIGATION_KEYS.includes(event.key as CalendarNavigationKey)) return;
@@ -616,7 +636,7 @@ export class WebtananDatePicker {
       button.title = metadata.join('، ');
       button.setAttribute('aria-label', `${this.displayNumber(cell.day)} ${view.monthName} ${this.displayNumber(view.year)}${metadata.length ? `، ${metadata.join('، ')}` : ''}`);
 
-      const disabled = this.isDateDisabled(cell.date) || status === 'closed';
+      const disabled = this.isDateDisabled(cell.date);
       button.disabled = disabled;
       button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
       button.tabIndex = !disabled && cell.date === focusTarget ? 0 : -1;
