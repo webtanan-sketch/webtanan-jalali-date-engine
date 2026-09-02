@@ -12,7 +12,8 @@
     "php": ">=8.1"
   },
   "suggest": {
-    "illuminate/support": "برای یکپارچه‌سازی خودکار با Laravel"
+    "illuminate/support": "برای یکپارچه‌سازی خودکار با Laravel",
+    "illuminate/contracts": "برای استفاده از JalaliDateRule در Validation لاراول"
   },
   "extra": {
     "laravel": {
