@@ -24,6 +24,7 @@ const parseYear = (date: string): number => {
 
 export class AnnualHolidayDataset implements HolidayProvider {
   readonly name: string;
+  readonly version = '1';
   readonly year: number;
   readonly source: HolidayDatasetSource;
   private readonly holidays: Holiday[];
@@ -49,7 +50,8 @@ export class AnnualHolidayDataset implements HolidayProvider {
     this.name = `iran-annual-${payload.year}`;
   }
 
-  getHolidays(): Holiday[] {
+  getHolidays(year: number): Holiday[] {
+    if (year !== this.year) return [];
     return this.holidays.map((holiday) => ({ ...holiday }));
   }
 
@@ -58,7 +60,7 @@ export class AnnualHolidayDataset implements HolidayProvider {
       schemaVersion: 1,
       year: this.year,
       source: { ...this.source },
-      holidays: this.getHolidays(),
+      holidays: this.getHolidays(this.year),
     };
   }
 
