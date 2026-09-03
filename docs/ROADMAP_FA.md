@@ -1,171 +1,84 @@
-# نقشه راه نهایی Webtanan Jalali Date Engine
+# نقشه راه Webtanan Jalali Date Engine
 
-وضعیت مبنا: **v0.17.0**
+## وضعیت فعلی
 
-هدف: رسیدن به **v1.0.0 پایدار سازمانی** با تقویم شمسی حرفه‌ای، تقویم کاری بزرگ، Task/Event management، ذخیره‌سازی محلی و اتصال امن به MySQL.
+**v1.0.0 — Stable / پایدار**
 
----
-
-## v0.18.0 — Big Work Calendar / تقویم بزرگ کاری
-
-یک حالت مستقل و تمام‌صفحه برای استفاده مدیریتی اضافه می‌شود.
-
-### نمای اصلی
-- تقویم ماهانه بزرگ و Responsive
-- هر روز یک خانه بزرگ با فضای کافی برای لیست کارها
-- نمایش تاریخ شمسی و در صورت نیاز معادل میلادی
-- نمایش تعطیلات رسمی، تعطیلات شرکت و وضعیت روز
-- نمایش تعداد کارهای باقی‌مانده و انجام‌شده
-
-### لیست کار هر روز
-هر روز بتواند چندین Task داشته باشد با فیلدهای:
-- عنوان
-- ساعت شروع و پایان
-- وضعیت: انجام‌نشده / درحال انجام / انجام‌شده / لغوشده
-- اولویت: عادی / مهم / فوری
-- دسته‌بندی
-- مسئول / کاربر
-- توضیح
-- رنگ یا Tag
-- تاریخ ایجاد و آخرین ویرایش
-- تاریخ شمسی و معادل میلادی
-
-### تعامل
-- افزودن سریع کار از داخل همان روز
-- ویرایش و حذف کار
-- علامت انجام‌شدن بدون بازکردن فرم کامل
-- بازکردن پنل جزئیات روز
-- فیلتر بر اساس وضعیت، مسئول، دسته‌بندی و اولویت
-- نمایش «+N کار دیگر» در روزهای شلوغ
-- جابه‌جایی بین ماه قبل/بعد و رفتن به امروز
-- پشتیبانی Keyboard و ARIA
-
-### API
-- `BigCalendar`
-- `TaskEngine`
-- `getTasksByDate()`
-- `addTask()`
-- `updateTask()`
-- `completeTask()`
-- `deleteTask()`
-- `moveTask()`
-- `filterTasks()`
+مسیر اولیه تا نسخه 1 تکمیل شده است.
 
 ---
 
-## v0.19.0 — Local Database / دیتابیس محلی واقعی
+## موارد تکمیل‌شده تا v1
 
-### SQLite
-برای Electron، Node و نرم‌افزارهای دسکتاپ:
-- SQLite به‌عنوان دیتابیس محلی استاندارد
-- Migration و Schema versioning
-- Transaction
-- Index برای تاریخ، وضعیت، مسئول و نوع رکورد
-- Backup / Restore
-- Export / Import JSON
+### هسته تقویم
+- تبدیل دوطرفه شمسی ↔ میلادی
+- اعتبارسنجی شمسی و میلادی
+- تشخیص کبیسه الگوریتمی برای سال‌های 1 تا 3177
+- اعداد فارسی/عربی/انگلیسی
+- Date + Time
+- Single / Range / Multiple
+- Min / Max / Disabled Dates
 
-### Browser
-برای HTML/Browser:
-- IndexedDB Adapter به‌عنوان ذخیره‌سازی محلی ساختاریافته
-- fallback به LocalStorage فقط برای Stateهای سبک
+### رابط کاربری
+- DatePicker حرفه‌ای RTL
+- Keyboard Navigation و ARIA
+- Web Component
+- چهار Theme صنعتی
+- Theme سفارشی با CSS Variables
+- BigWorkCalendar تمام‌عرض
+- چند Task در هر خانه روز
 
-### جداول اصلی
-- `calendar_tasks`
-- `calendar_events`
-- `day_statuses`
-- `holidays`
-- `calendar_settings`
-- `audit_log`
+### تعطیلات و سازمان
+- تعطیلات رسمی 1404
+- تعطیلات رسمی 1405
+- Dataset Loader سالانه
+- تعطیلات شرکت
+- Day Status
+- Business Day Calculator
+- Event / CRM / Sales / Production / Accounting
 
----
+### Task و دیتابیس
+- WorkTaskManager
+- Memory Repository
+- IndexedDB برای Browser/PWA
+- SQLite برای Node/Electron
+- MySQL برای Node Server
+- SQLite/MySQL با PDO در PHP/Laravel
+- WorkTaskPersistence
+- Backup / Restore نسخه‌دار
+- Stress Test با 5000 Task
 
-## v0.20.0 — MySQL & Server Persistence
+### بسته‌بندی
+- TypeScript declarations
+- CommonJS
+- ESM
+- Browser Bundle
+- Minified Bundle
+- CSS export
+- React adapter
+- Vue adapter
+- PHP / Laravel package structure
 
-### MySQL
-- MySQL Repository/Driver
-- Migration مستقل MySQL
-- CRUD کامل Task/Event/Status/Holiday
-- Query بر اساس بازه تاریخ
-- Pagination برای داده زیاد
-- Transaction
-- Connection health check
-
-### Laravel / PHP
-- استفاده از PDO / Laravel Database
-- Config اتصال
-- Repository آماده
-- Validation
-- Migration لاراول
-
-### JavaScript / Browser
-اتصال مستقیم Browser به MySQL مجاز نیست؛ برای امنیت:
-- REST Adapter / Backend API
-- Token/Auth توسط اپلیکیشن میزبان
-
-### Electron / Node
-- امکان Driver مستقیم Server-side در صورت انتخاب برنامه میزبان
-
----
-
-## v0.21.0 — Data Sync & Enterprise Reliability
-
-- انتخاب Storage mode: Memory / Browser / SQLite / REST / MySQL backend
-- لایه Repository واحد برای تمام Storageها
-- Conflict-safe update
-- optimistic concurrency / revision
-- Audit Log
-- createdBy / updatedBy
-- createdAt / updatedAt
-- migration test
-- backup/restore test
-- تست دیتابیس با حجم بالا
-
----
-
-## v1.0.0-rc.1 — Release Candidate
-
-- Freeze کردن Public API
-- بررسی کامل TypeScript declarations
-- بررسی React/Vue/Web Component
-- تست Big Calendar روی Desktop/Mobile
-- تست Accessibility
-- تست Performance با هزاران Task/Event
-- تست SQLite
-- تست MySQL integration
-- تست Laravel/PHP
-- تست ESM / CommonJS / Browser Bundle
+### کنترل کیفیت
+- Public API Contract
 - Package Smoke Test
-- مستندات فارسی کامل
-- راهنمای Migration و Database
-- Demo واقعی Big Work Calendar
-- Demo CRM / Sales / Accounting / Production
-
-هیچ قابلیت جدیدی بعد از RC اضافه نمی‌شود؛ فقط Bug Fix و Hardening.
+- CI Node/PHP
+- Release Candidate کامل
+- 35 Test Suite و 180 تست موفق در RC
 
 ---
 
-## v1.0.0 — نسخه نهایی پایدار
+# مسیر بعد از v1
 
-شرط انتشار:
-- CI کاملاً سبز
-- صفر خطای شناخته‌شده بحرانی
-- Public API پایدار
-- تست دیتابیس محلی و MySQL موفق
-- Demoها قابل اجرا
-- مستندات نصب و API کامل
-- بسته انتشار ESM / CommonJS / Browser / CSS / React / Vue / PHP-Laravel آماده
+نسخه‌های `1.x` فقط قابلیت‌های سازگار با API پایدار اضافه خواهند کرد. ایده‌های آینده:
 
----
+- Week View / نمای هفتگی کاری
+- Day Timeline / برنامه ساعتی روز
+- Drag & Drop اختیاری برای Taskها
+- Recurring Tasks / کارهای تکرارشونده
+- Sync Provider برای Offline-first
+- Laravel Migration و Eloquent Adapter اختیاری
+- MySQL/PostgreSQL integration tests در محیط‌های سرویس‌دار CI
+- Localization فراتر از فارسی در صورت نیاز
 
-# تصمیم معماری دیتابیس
-
-## Local
-**SQLite** دیتابیس محلی اصلی برای Desktop/Electron خواهد بود.
-
-## Browser
-**IndexedDB** برای ذخیره‌سازی ساختاریافته محلی Browser استفاده می‌شود.
-
-## Server
-**MySQL** از طریق Backend/Laravel/Node server یا Driver امن استفاده می‌شود.
-
-اطلاعات اتصال و رمز MySQL هرگز داخل JavaScript سمت Browser قرار نمی‌گیرد.
+تغییر ناسازگار Public API فقط در Major Version بعدی انجام خواهد شد.
