@@ -17,6 +17,11 @@ export { TimeSelector } from './time/TimeSelector';
 export type { TimeValue, TimeSelectorOptions } from './time/TimeSelector';
 
 export { EventEngine } from './enterprise/EventEngine';
+export type {
+  EventType,
+  CalendarEvent,
+  CalendarEventRecord,
+} from './enterprise/EventEngine';
 export { HolidayEngine } from './enterprise/HolidayEngine';
 export type {
   Holiday,
@@ -49,9 +54,16 @@ export { DayStatusEngine } from './enterprise/DayStatusEngine';
 export { WorkflowTimeline } from './enterprise/WorkflowTimeline';
 
 export { CRMAdapter } from './integrations/CRMAdapter';
+export type { CRMCustomerEvent, CRMCustomerRecord } from './integrations/CRMAdapter';
 export { CalendarEventBridge } from './integrations/CalendarEventBridge';
 export { SalesWorkflowAdapter } from './integrations/SalesWorkflowAdapter';
+export type { SalesStage, SalesStep } from './integrations/SalesWorkflowAdapter';
 export { ProductionWorkflowAdapter } from './integrations/ProductionWorkflowAdapter';
+export type {
+  ProductionStageStatus,
+  ProductionStage,
+  ProductionOrder,
+} from './integrations/ProductionWorkflowAdapter';
 
 export { MemoryStorageAdapter, BrowserStorageAdapter } from './storage/StorageAdapter';
 export type { StorageAdapter, BrowserStorageLike } from './storage/StorageAdapter';
