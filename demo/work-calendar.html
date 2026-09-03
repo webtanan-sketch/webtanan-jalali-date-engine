@@ -50,11 +50,29 @@
   const host=document.getElementById('calendar');calendar.open(host);
   const theme=document.getElementById('theme');
   API.ThemeManager.list().forEach(t=>{const o=document.createElement('option');o.value=t.name;o.textContent=t.titleFa;theme.appendChild(o)});theme.value='navy-command';
-  theme.addEventListener('change',()=>{const current=calendar.getCurrentMonth();calendar.close();const next=new API.BigWorkCalendar(manager,{...current,theme:theme.value,maxVisibleTasksPerDay:4});window.demoCalendar=next;next.open(host);bind(next)});
   let active=calendar;window.demoCalendar=calendar;
-  function bind(instance){active=instance;host.addEventListener(API.BigWorkCalendar.dayEventName,onDay,{once:false})}
-  function onDay(event){const {date,tasks}=event.detail;document.getElementById('dayTitle').textContent=`کارهای ${date}`;const box=document.getElementById('dayTasks');box.replaceChildren();if(!tasks.length){box.textContent='کاری ثبت نشده است.';return}tasks.forEach(task=>{const row=document.createElement('div');row.className='task-row';const time=document.createElement('strong');time.textContent=task.time||'—';const title=document.createElement('div');title.innerHTML=`<strong>${task.title}</strong><div class="muted">${task.assignee||'بدون مسئول'} · ${task.category||'بدون دسته‌بندی'}</div>`;const status=document.createElement('span');status.textContent=task.status;row.append(time,title,status);box.append(row)})}
-  bind(calendar);
+  function onDay(event){
+    const {date,tasks}=event.detail;
+    document.getElementById('dayTitle').textContent=`کارهای ${date}`;
+    const box=document.getElementById('dayTasks');box.replaceChildren();
+    if(!tasks.length){box.textContent='کاری ثبت نشده است.';return}
+    tasks.forEach(task=>{
+      const row=document.createElement('div');row.className='task-row';
+      const time=document.createElement('strong');time.textContent=task.time||'—';
+      const title=document.createElement('div');
+      const titleStrong=document.createElement('strong');titleStrong.textContent=task.title;
+      const meta=document.createElement('div');meta.className='muted';meta.textContent=`${task.assignee||'بدون مسئول'} · ${task.category||'بدون دسته‌بندی'}`;
+      title.append(titleStrong,meta);
+      const status=document.createElement('span');status.textContent=task.status;
+      row.append(time,title,status);box.append(row)
+    })
+  }
+  host.addEventListener(API.BigWorkCalendar.dayEventName,onDay);
+  theme.addEventListener('change',()=>{
+    const current=active.getCurrentMonth();active.close();
+    active=new API.BigWorkCalendar(manager,{...current,theme:theme.value,maxVisibleTasksPerDay:4});
+    window.demoCalendar=active;active.open(host)
+  });
   document.getElementById('addTask').addEventListener('click',()=>{const id='sample-'+Date.now();manager.add({id,date:'1405/06/15',title:'کار جدید نمونه',time:'10:15',assignee:'کاربر',priority:'high'});const current=active.getCurrentMonth();active.setMonth(current.year,current.month)});
   document.getElementById('toggleFirst').addEventListener('click',()=>{const first=manager.query()[0];if(first){manager.toggleDone(first.id);const current=active.getCurrentMonth();active.setMonth(current.year,current.month)}});
 </script>
