@@ -1,6 +1,6 @@
 # API فارسی Webtanan Jalali Date Engine
 
-این سند API عمومی موتور تاریخ شمسی وب‌تنان را توضیح می‌دهد. مسیرهای داخلی `src/...` قرارداد عمومی محسوب نمی‌شوند؛ مصرف‌کننده باید از خروجی اصلی پکیج یا Subpathهای رسمی استفاده کند.
+این سند قرارداد عمومی **Webtanan Jalali Date Engine** را توضیح می‌دهد. مسیرهای داخلی `src/...` قرارداد عمومی محسوب نمی‌شوند؛ مصرف‌کننده باید از خروجی اصلی پکیج یا Subpathهای رسمی استفاده کند.
 
 ---
 
@@ -10,57 +10,40 @@
 
 ```ts
 import { JalaliConverter } from 'webtanan-jalali-date-engine';
-```
 
-API اصلی:
-
-```ts
 JalaliConverter.isLeapYear(1360)
 JalaliConverter.daysInMonth(1403, 12)
 JalaliConverter.isValid({ year: 1404, month: 12, day: 30 })
-JalaliConverter.toGregorian({ year: 1405, month: 6, day: 11 })
 JalaliConverter.toGregorianISO({ year: 1405, month: 6, day: 11 })
 JalaliConverter.toJalali({ year: 2026, month: 9, day: 2 })
 ```
 
-محدوده الگوریتم فعلی:
+محدوده الگوریتم:
 
 ```ts
-JalaliConverter.supportedYears.min // 1
-JalaliConverter.supportedYears.max // 3177
+JalaliConverter.supportedYears // { min: 1, max: 3177 }
 ```
 
-تشخیص کبیسه برای تمام این بازه از خود الگوریتم انجام می‌شود و به دیتاست تعطیلات وابسته نیست.
+تشخیص سال کبیسه برای **تمام این بازه از خود الگوریتم** انجام می‌شود و به جدول دستی یا دیتاست تعطیلات وابسته نیست.
 
 ### `JalaliYearEngine`
 
 ```ts
-import { JalaliYearEngine, getJalaliYearInfo } from 'webtanan-jalali-date-engine';
-
 JalaliYearEngine.isLeap(1360)
 JalaliYearEngine.esfandDays(1360)
 JalaliYearEngine.daysInYear(1360)
-
 getJalaliYearInfo(1360)
 ```
-
-خروجی `getJalaliYearInfo` شامل وضعیت کبیسه، تعداد روز سال، تعداد روز اسفند، اول فروردین و آخر سال به میلادی است.
 
 ---
 
 ## 2) اعتبارسنجی و اعداد فارسی
 
-### `DateValidator`
-
 ```ts
 DateValidator.normalize('۱۴۰۵/۶/۱۱') // 1405/06/11
 DateValidator.toGregorianISO('1405/06/11') // 2026-09-02
 DateValidator.compare('1405/06/10', '1405/06/11') // -1
-```
 
-### `PersianDigits`
-
-```ts
 PersianDigits.toPersian('1405')
 PersianDigits.toEnglish('۱۴۰۵')
 ```
@@ -69,15 +52,11 @@ PersianDigits.toEnglish('۱۴۰۵')
 
 ## 3) Date Picker
 
-### `WebtananDatePicker`
-
 ```ts
 const picker = new WebtananDatePicker({
-  calendar: 'jalali',
   rtl: true,
   persianDigits: true,
   time: true,
-  seconds: false,
   minuteStep: 15,
   range: false,
   multiple: false,
@@ -86,27 +65,14 @@ const picker = new WebtananDatePicker({
   theme: 'industrial-light',
   minDate: '1360/01/01',
   maxDate: '1500/12/29',
-  disabledDates: [],
 });
-```
 
-عملیات عمومی:
-
-```ts
 picker.open('#host')
-picker.close()
 picker.setDate('1405/06/11')
-picker.getDate()
 picker.setTime(14, 30)
-picker.getTime()
-picker.getDateTime()
 picker.setRange('1405/06/01', '1405/06/10')
-picker.getRange()
 picker.setMultipleDates(['1405/06/01', '1405/06/10'])
-picker.getMultipleDates()
-picker.setDisabledDates(['1405/06/12'])
 picker.setTheme('graphite-dark')
-picker.getTheme()
 picker.clear()
 ```
 
@@ -117,8 +83,6 @@ host.addEventListener('webtanan-date-change', (event) => {
   console.log(event.detail);
 });
 ```
-
-`detail` شامل تاریخ شمسی، معادل میلادی، زمان، DateTime، Range و چندتاریخی است.
 
 ---
 
@@ -134,26 +98,19 @@ host.addEventListener('webtanan-date-change', (event) => {
 ```ts
 ThemeManager.list()
 ThemeManager.apply(element, 'navy-command')
-ThemeManager.applyCustomVariables(element, {
-  accent: '#17365d',
-  border: '#c9d4df',
-})
+ThemeManager.applyCustomVariables(element, { accent: '#17365d' })
 ```
-
-CSS Themeها بر پایه Variable طراحی شده است و تغییر ظاهر منطق تقویم را تغییر نمی‌دهد.
 
 ---
 
 ## 5) تعطیلات ایران
 
-دیتاست داخلی فعلی:
+دیتاست داخلی رسمی پروژه:
 
 ```ts
 IRAN_OFFICIAL_DATASET_YEARS // [1404, 1405]
 getIranOfficialHolidayDataset(1405)
 ```
-
-### `HolidayEngine`
 
 ```ts
 const holidays = new HolidayEngine();
@@ -166,197 +123,315 @@ holidays.add({
   type: 'company',
   source: 'company',
 });
-
-holidays.isHoliday('1405/07/10')
-holidays.get('1405/07/10')
 ```
 
-### `HolidayDatasetLoader`
-
-برای سال‌های بعد، دیتاست JSON رسمی را بدون تغییر هسته بارگذاری می‌کند.
+برای سال‌های بعد `HolidayDatasetLoader` دیتاست سالانه را بدون تغییر هسته بارگذاری می‌کند.
 
 ---
 
-## 6) وضعیت روزها
-
-### `DayStatusEngine`
+## 6) وضعیت روز و روز کاری
 
 ```ts
 const status = new DayStatusEngine();
 status.set('1405/06/11', 'meeting');
-status.set({
-  date: '1405/06/12',
-  status: 'closed',
-  title: 'تعمیرات',
-  user: 'مدیر کارخانه',
-});
+status.set({ date: '1405/06/12', status: 'closed', title: 'تعمیرات' });
 
-status.get('1405/06/12')
-status.getRecord('1405/06/12')
-status.getByStatus('closed')
-status.setMany([...])
-status.clearByStatus('meeting')
-status.toJSON()
-```
-
-وضعیت‌ها:
-
-`free | work | meeting | holiday | closed`
-
----
-
-## 7) محاسبه روز کاری
-
-### `BusinessDayCalculator`
-
-جمعه به‌صورت پیش‌فرض تعطیل هفتگی است؛ این تنظیم قابل تغییر است.
-
-```ts
-const business = new BusinessDayCalculator({
-  holidays,
-  dayStatuses: status,
-});
-
+const business = new BusinessDayCalculator({ holidays, dayStatuses: status });
 business.isBusinessDay('1405/06/11')
 business.nextBusinessDay('1405/06/11')
-business.previousBusinessDay('1405/06/11')
 business.addBusinessDays('1405/06/11', 10)
-business.countBusinessDays('1405/06/01', '1405/06/31')
 ```
+
+وضعیت‌ها: `free | work | meeting | holiday | closed`
 
 ---
 
-## 8) Event Engine
+## 7) Event / CRM / Sales / Production / Accounting
+
+APIهای سازمانی عمومی:
+
+- `EventEngine`
+- `CRMAdapter`
+- `SalesWorkflowAdapter`
+- `ProductionWorkflowAdapter`
+- `AccountingCalendarAdapter`
+- `WorkflowTimeline`
+- `CalendarEventBridge`
+
+رکوردهای اصلی تاریخ شمسی و معادل میلادی را نگهداری می‌کنند و در بخش‌های Audit از `createdAt` و اطلاعات کاربر پشتیبانی می‌شود.
+
+نمونه Event:
 
 ```ts
 const events = new EventEngine();
-const record = events.add({
+events.add({
   id: 'evt-100',
   date: '1405/06/11',
   time: '09:30',
   title: 'جلسه مشتری',
   type: 'meeting',
   user: 'کارشناس فروش',
-  description: 'بررسی قیمت',
 });
-```
-
-رکورد خروجی به‌طور خودکار `gregorianDate` و `createdAt` دارد.
-
-API:
-
-```ts
-events.update(id, patch)
-events.getById(id)
-events.getByDate(date)
-events.list()
-events.remove(id)
-events.toJSON()
 ```
 
 ---
 
-## 9) CRM Adapter
+# 8) تقویم بزرگ کاری — `BigWorkCalendar`
+
+این کامپوننت برای صفحه‌های مدیریتی تمام‌عرض ساخته شده است و با Date Picker کوچک تفاوت دارد. هر خانه روز می‌تواند چند Task را نمایش دهد.
 
 ```ts
-const crm = new CRMAdapter();
-crm.addFollowUp({
-  customer: 'رضا احمدی',
+import {
+  BigWorkCalendar,
+  WorkTaskManager,
+} from 'webtanan-jalali-date-engine';
+
+const manager = new WorkTaskManager();
+manager.add({
   date: '1405/06/11',
-  title: 'پیگیری قیمت',
-  type: 'followup',
-  user: 'فروش',
+  title: 'پیگیری مشتری',
+  time: '10:30',
+  assignee: 'رضا',
+  category: 'فروش',
+  priority: 'high',
 });
 
-crm.getCustomerTimeline('رضا احمدی')
-crm.getCustomerRecords('رضا احمدی')
-crm.getUpcoming('1405/06/01')
+const calendar = new BigWorkCalendar(manager, {
+  year: 1405,
+  month: 6,
+  theme: 'navy-command',
+  maxVisibleTasksPerDay: 4,
+});
+
+calendar.open(document.querySelector('#calendar')!);
 ```
 
-`getCustomerTimeline` برای سازگاری API ساده قبلی را نگه می‌دارد؛ `getCustomerRecords` رکورد کامل Audit را برمی‌گرداند.
+رویداد انتخاب روز:
+
+```ts
+host.addEventListener(BigWorkCalendar.dayEventName, (event) => {
+  console.log(event.detail.date);
+  console.log(event.detail.tasks);
+});
+```
+
+قابلیت‌ها:
+
+- ماه قبل / بعد
+- نمایش چند Task در هر روز
+- `+N کار دیگر`
+- اولویت و وضعیت
+- ساعت و مسئول
+- Themeهای حرفه‌ای
+- حالت readonly
+- Add / Update / Remove Task
 
 ---
 
-## 10) گردش فروش
+# 9) مدل Task
 
-### `SalesWorkflowAdapter`
-
-```ts
-const sales = new SalesWorkflowAdapter();
-sales.addStep({ stage: 'order', date: '1405/06/01', status: 'done' });
-sales.addStep({ stage: 'approval', date: '1405/06/02', status: 'active' });
-
-sales.getSteps()
-sales.getCurrentStage()
-sales.getProgress()
-sales.isDelayed('1405/06/20', '1405/06/21')
-sales.toJSON()
-```
-
-مراحل استاندارد:
-
-`order → approval → production → loading → delivery`
-
----
-
-## 11) گردش تولید
-
-### `ProductionWorkflowAdapter`
+### `createWorkTask`
 
 ```ts
-const production = new ProductionWorkflowAdapter();
-production.createOrder({
-  id: 'P-100',
-  product: 'کاشی استخری',
-  quantity: 120,
-  startDate: '1405/06/01',
-  dueDate: '1405/06/20',
-});
-
-production.updateStage('P-100', 'production', {
-  status: 'active',
-  date: '1405/06/05',
-  responsible: 'سرپرست تولید',
-});
-
-production.getProgress('P-100')
-production.getCurrentStage('P-100')
-production.isDelayed('P-100', '1405/06/21')
-production.listOrders()
-```
-
----
-
-## 12) تقویم حسابداری
-
-### `AccountingCalendarAdapter`
-
-```ts
-const accounting = new AccountingCalendarAdapter();
-accounting.add({
-  id: 'ACC-1',
+const task = createWorkTask({
   date: '1405/06/11',
-  title: 'سررسید پرداخت',
-  type: 'payment-due',
-  amount: 25000000,
-  user: 'حسابدار',
+  title: 'ارسال پیش‌فاکتور',
+  time: '11:30',
+  status: 'todo',
+  priority: 'high',
+  category: 'فروش',
+  assignee: 'نگار',
+  tags: ['مشتری', 'پیگیری'],
 });
-
-accounting.getByDate('1405/06/11')
-accounting.getUpcoming('1405/06/01', '1405/06/31')
-accounting.getPendingDues('1405/06/15')
-accounting.sum('payment-due', 'pending')
 ```
 
-نوع رکوردها:
+`WorkTaskRecord` شامل این فیلدها است:
 
-`invoice | payment-due | payment-received | payroll | tax | period-closing`
+- `id`
+- `dateJalali`
+- `dateGregorian`
+- `title`
+- `time / endTime`
+- `status`
+- `priority`
+- `category`
+- `assignee`
+- `description`
+- `color`
+- `tags`
+- `createdBy`
+- `createdAt / updatedAt / completedAt`
+
+وضعیت Task:
+
+`todo | in_progress | done | cancelled`
+
+اولویت:
+
+`low | normal | high | urgent`
 
 ---
 
-## 13) Persistence و Storage
+# 10) `WorkTaskManager`
 
-Adapterهای موجود:
+```ts
+const manager = new WorkTaskManager();
+manager.add(...)
+manager.update(id, patch)
+manager.toggleDone(id)
+manager.remove(id)
+manager.getByDate('1405/06/11')
+manager.getOverdue('1405/06/15')
+manager.query({ assignee: 'رضا', category: 'فروش' })
+manager.importRecords(records)
+manager.toJSON()
+```
+
+---
+
+# 11) Repositoryهای Task
+
+قرارداد مشترک:
+
+```ts
+interface WorkTaskRepository {
+  install?(): Promise<void>;
+  upsert(task): Promise<void>;
+  upsertMany(tasks): Promise<void>;
+  get(id): Promise<WorkTaskRecord | null>;
+  delete(id): Promise<boolean>;
+  query(query?): Promise<WorkTaskRecord[]>;
+  count(query?): Promise<number>;
+  clear(): Promise<void>;
+}
+```
+
+پیاده‌سازی‌ها:
+
+- `MemoryWorkTaskRepository`
+- `IndexedDbWorkTaskRepository`
+- `SqlWorkTaskRepository`
+
+### Browser / PWA — IndexedDB
+
+```ts
+const repo = new IndexedDbWorkTaskRepository({
+  databaseName: 'company-calendar',
+});
+await repo.install();
+```
+
+### Electron / Node — SQLite
+
+```ts
+import Database from 'better-sqlite3';
+
+const db = new Database('./calendar.sqlite');
+const executor = new BetterSqlite3Executor(db);
+const repo = new SqlWorkTaskRepository(executor, { dialect: 'sqlite' });
+await repo.install();
+```
+
+### Node Server — MySQL
+
+```ts
+import mysql from 'mysql2/promise';
+
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  database: process.env.DB_DATABASE,
+  user: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+});
+
+const executor = new Mysql2Executor(pool);
+const repo = new SqlWorkTaskRepository(executor, { dialect: 'mysql' });
+await repo.install();
+```
+
+> `better-sqlite3` و `mysql2` وابستگی اجباری خود کتابخانه نیستند؛ Driver از پروژه مصرف‌کننده تزریق می‌شود.
+
+---
+
+# 12) همگام‌سازی UI و دیتابیس — `WorkTaskPersistence`
+
+```ts
+const persistence = new WorkTaskPersistence(manager, repo);
+await persistence.install();
+await persistence.load();
+
+await persistence.add({ date: '1405/06/11', title: 'پیگیری' });
+await persistence.update(id, { priority: 'urgent' });
+await persistence.toggleDone(id);
+await persistence.remove(id);
+```
+
+در شکست عملیات Repository، Manager تا جای ممکن به وضعیت قبلی برگردانده می‌شود.
+
+---
+
+# 13) Backup / Restore
+
+```ts
+const backup = WorkTaskBackup.create(manager, {
+  company: 'Example Company',
+});
+
+const json = WorkTaskBackup.stringify(backup);
+const parsed = WorkTaskBackup.parse(json);
+await WorkTaskBackup.restore(parsed, manager, repo);
+```
+
+نسخه Schema:
+
+```ts
+WORK_TASK_BACKUP_SCHEMA_VERSION // 1
+```
+
+Backup قبل از ورود به Manager مجدداً با Validation اصلی Task بررسی می‌شود.
+
+---
+
+# 14) PHP / Laravel — SQLite و MySQL
+
+PHP دارای این APIهای عمومی است:
+
+- `PdoConnectionFactory`
+- `PdoWorkTaskRepository`
+- `PdoCalendarStateStore`
+- `JalaliDate`
+- `JalaliValidator`
+- `JalaliYearInfo`
+
+SQLite:
+
+```php
+$pdo = PdoConnectionFactory::sqlite(storage_path('app/calendar.sqlite'));
+$tasks = new PdoWorkTaskRepository($pdo);
+$tasks->install();
+```
+
+MySQL:
+
+```php
+$pdo = PdoConnectionFactory::mysql(
+    host: env('DB_HOST'),
+    database: env('DB_DATABASE'),
+    username: env('DB_USERNAME'),
+    password: env('DB_PASSWORD'),
+);
+
+$tasks = new PdoWorkTaskRepository($pdo);
+$tasks->install();
+```
+
+جزئیات: `docs/DATABASE_FA.md`
+
+---
+
+# 15) Storage عمومی DatePicker
+
+Adapterهای عمومی State:
 
 - `MemoryStorageAdapter`
 - `BrowserStorageAdapter`
@@ -365,11 +440,11 @@ Adapterهای موجود:
 - `JsonRepository`
 - `DatePickerPersistence`
 
-PHP/Laravel نیز Storeهای PDO و Laravel Cache را دارد.
+این لایه با Repository تخصصی Task جدا است.
 
 ---
 
-## 14) React و Vue
+# 16) React / Vue / Browser
 
 React:
 
@@ -383,19 +458,13 @@ Vue:
 import { WebtananJalaliDatePickerVue } from 'webtanan-jalali-date-engine/vue';
 ```
 
-React/Vue Peer Dependency اختیاری‌اند و هسته اصلی را سنگین نمی‌کنند.
-
----
-
-## 15) Browser Bundle
-
-بعد از build:
+Browser Bundle:
 
 - `dist/browser/webtanan-jalali.js`
 - `dist/browser/webtanan-jalali.min.js`
 - `dist/browser/webtanan-jalali.css`
 
-در حالت Script Tag، API زیر global قرار می‌گیرد:
+Global:
 
 ```js
 window.WebtananJalali
@@ -403,6 +472,6 @@ window.WebtananJalali
 
 ---
 
-## قرارداد نسخه پایدار
+# قرارداد v1
 
-تا قبل از `v1.0.0` ممکن است APIهای جدید اضافه شوند. حذف یا شکستن APIهای موجود باید فقط با مستندات Migration و تغییر نسخه اصلی انجام شود.
+از `v1.0.0` به بعد APIهای مستند این فایل قرارداد پایدار هستند. حذف یا تغییر ناسازگار فقط در Major Version بعدی انجام می‌شود. قابلیت‌های جدید سازگار می‌توانند در Minor Version اضافه شوند.
