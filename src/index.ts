@@ -56,6 +56,11 @@ export {
   getIranOfficialHolidayDataset,
 } from './enterprise/holidays/IranOfficialHolidayDatasets';
 export { DayStatusEngine } from './enterprise/DayStatusEngine';
+export type {
+  DayStatus,
+  DayStatusRecord,
+  DayStatusInput,
+} from './enterprise/DayStatusEngine';
 export { WorkflowTimeline } from './enterprise/WorkflowTimeline';
 
 export { CRMAdapter } from './integrations/CRMAdapter';
