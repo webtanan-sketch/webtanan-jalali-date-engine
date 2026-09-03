@@ -35,6 +35,7 @@ const requiredFunctionsAndClasses = [
   'BetterSqlite3Executor',
   'Mysql2Executor',
   'WorkTaskPersistence',
+  'WorkTaskBackup',
   'WebtananJalaliDatePickerElement',
   'defineWebtananJalaliDatePicker',
 ] as const;
@@ -63,5 +64,9 @@ describe('Public API contract', () => {
       'steel-neutral',
       'graphite-dark',
     ]);
+  });
+
+  test('نسخه Schema بکاپ Task در API عمومی ثابت است', () => {
+    expect(API.WORK_TASK_BACKUP_SCHEMA_VERSION).toBe(1);
   });
 });
