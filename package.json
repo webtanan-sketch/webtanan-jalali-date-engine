@@ -1,6 +1,6 @@
 {
   "name": "webtanan-jalali-date-engine",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0",
   "description": "موتور تاریخ شمسی حرفه‌ای با DatePicker، تقویم بزرگ کاری، تعطیلات، Task، SQLite، MySQL، React، Vue، Electron و Laravel",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.mjs",
