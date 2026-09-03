@@ -1,43 +1,49 @@
 {
   "name": "webtanan-jalali-date-engine",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "موتور تاریخ شمسی حرفه‌ای برای JavaScript، TypeScript، React، Vue، Electron، Laravel و نرم‌افزارهای سازمانی",
   "main": "./dist/index.js",
+  "module": "./dist/esm/index.mjs",
   "types": "./dist/index.d.ts",
   "browser": "./dist/browser/webtanan-jalali.min.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.mjs",
       "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "default": "./dist/esm/index.mjs"
     },
     "./react": {
       "types": "./dist/framework/react.d.ts",
+      "import": "./dist/esm/react.mjs",
       "require": "./dist/framework/react.js",
-      "default": "./dist/framework/react.js"
+      "default": "./dist/esm/react.mjs"
     },
     "./vue": {
       "types": "./dist/framework/vue.d.ts",
+      "import": "./dist/esm/vue.mjs",
       "require": "./dist/framework/vue.js",
-      "default": "./dist/framework/vue.js"
+      "default": "./dist/esm/vue.mjs"
     },
     "./browser": "./dist/browser/webtanan-jalali.js",
     "./browser.min": "./dist/browser/webtanan-jalali.min.js",
-    "./css": "./dist/browser/webtanan-jalali.css"
+    "./css": "./dist/browser/webtanan-jalali.css",
+    "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "docs"],
+  "files": ["dist", "README.md", "docs", "package.json"],
   "scripts": {
     "clean": "node scripts/clean.mjs",
     "build:types": "tsc -p tsconfig.build.json",
+    "build:modules": "node scripts/build-modules.mjs",
     "build:browser": "node scripts/build-browser.mjs",
-    "build": "npm run clean && npm run build:types && npm run build:browser",
+    "build": "npm run clean && npm run build:types && npm run build:modules && npm run build:browser",
     "prepare": "npm run build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "jest --runInBand",
     "test:package": "node scripts/package-smoke.mjs",
     "test:ci": "npm run typecheck && npm test && npm run build && npm run test:package"
   },
-  "keywords": ["jalali", "persian-calendar", "datepicker", "iran", "rtl", "react", "vue", "electron", "laravel", "holidays", "official-holidays", "holiday-dataset", "persistence", "web-component", "rest", "database", "validation", "accessibility", "keyboard-navigation", "date-range", "multiple-dates", "disabled-dates", "themes", "dark-theme", "industrial-ui", "leap-year", "browser-bundle", "audit", "workflow", "business-day", "accounting-calendar", "crm", "production-planning"],
+  "keywords": ["jalali", "persian-calendar", "datepicker", "iran", "rtl", "react", "vue", "electron", "laravel", "holidays", "official-holidays", "holiday-dataset", "persistence", "web-component", "rest", "database", "validation", "accessibility", "keyboard-navigation", "date-range", "multiple-dates", "disabled-dates", "themes", "dark-theme", "industrial-ui", "leap-year", "browser-bundle", "audit", "workflow", "business-day", "accounting-calendar", "crm", "production-planning", "esm", "commonjs"],
   "peerDependencies": {
     "react": ">=18 <20",
     "vue": ">=3.4 <4"
