@@ -73,10 +73,12 @@
 - [x] API فارسی
 - [x] راهنمای دیتابیس
 - [x] راهنمای Laravel
+- [x] README نهایی با لحن تیم وب‌تنان
+- [x] تصاویر معرفی و معماری Repository
 
 ## کنترل نهایی v1
 - [x] CI Release Candidate سبز — 35 Suite / 180 تست
 - [x] Version = 1.0.0
-- [ ] README نهایی
-- [ ] تصاویر Repository
+- [x] README نهایی
+- [x] تصاویر Repository
 - [ ] CI نهایی Stable سبز
