@@ -59,8 +59,9 @@ export class BigWorkCalendar {
   }
 
   setMonth(year: number, month: number): void {
-    if (!Number.isInteger(year) || year < JalaliConverter.MIN_YEAR || year > JalaliConverter.MAX_YEAR) {
-      throw new RangeError(`سال شمسی باید بین ${JalaliConverter.MIN_YEAR} تا ${JalaliConverter.MAX_YEAR} باشد.`);
+    const { min, max } = JalaliConverter.supportedYears;
+    if (!Number.isInteger(year) || year < min || year > max) {
+      throw new RangeError(`سال شمسی باید بین ${min} تا ${max} باشد.`);
     }
     if (!Number.isInteger(month) || month < 1 || month > 12) throw new RangeError('ماه شمسی نامعتبر است.');
     this.year = year;
