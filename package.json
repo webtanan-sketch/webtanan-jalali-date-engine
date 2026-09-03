@@ -1,6 +1,6 @@
 {
   "name": "webtanan-jalali-date-engine",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "موتور تاریخ شمسی حرفه‌ای برای JavaScript، TypeScript، React، Vue، Electron، Laravel و نرم‌افزارهای سازمانی",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -10,6 +10,16 @@
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/framework/react.d.ts",
+      "require": "./dist/framework/react.js",
+      "default": "./dist/framework/react.js"
+    },
+    "./vue": {
+      "types": "./dist/framework/vue.d.ts",
+      "require": "./dist/framework/vue.js",
+      "default": "./dist/framework/vue.js"
     },
     "./browser": "./dist/browser/webtanan-jalali.js",
     "./browser.min": "./dist/browser/webtanan-jalali.min.js",
@@ -27,12 +37,23 @@
     "test:ci": "npm run typecheck && npm test && npm run build"
   },
   "keywords": ["jalali", "persian-calendar", "datepicker", "iran", "rtl", "react", "vue", "electron", "laravel", "holidays", "official-holidays", "holiday-dataset", "persistence", "web-component", "rest", "database", "validation", "accessibility", "keyboard-navigation", "date-range", "multiple-dates", "disabled-dates", "themes", "dark-theme", "industrial-ui", "leap-year", "browser-bundle"],
+  "peerDependencies": {
+    "react": ">=18 <20",
+    "vue": ">=3.4 <4"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true },
+    "vue": { "optional": true }
+  },
   "devDependencies": {
     "@types/jest": "^29.5.14",
+    "@types/react": "^19.0.0",
     "esbuild": "^0.25.9",
     "jest": "^29.7.0",
+    "react": "^19.0.0",
     "ts-jest": "^29.2.5",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vue": "^3.5.0"
   },
   "license": "MIT"
 }
