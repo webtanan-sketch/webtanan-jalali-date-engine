@@ -23,6 +23,7 @@ const requiredFiles = [
   'demo/work-calendar.html',
   'demo/shared.css',
   'docs/API_FA.md',
+  'docs/DATABASE_FA.md',
 ];
 
 for (const file of requiredFiles) await access(file);
@@ -49,17 +50,20 @@ const esm = await import(pathToFileURL(`${process.cwd()}/dist/esm/index.mjs`).hr
 if (esm.JalaliConverter.isLeapYear(1360) !== false) throw new Error('ESM JalaliConverter leap-year smoke failed.');
 if (esm.JalaliConverter.isLeapYear(1358) !== true) throw new Error('ESM leap-year historical smoke failed.');
 if (esm.JalaliConverter.toGregorianISO({ year: 1405, month: 6, day: 11 }) !== '2026-09-02') throw new Error('ESM conversion smoke failed.');
-for (const name of ['AccountingCalendarAdapter', 'BusinessDayCalculator', 'BigWorkCalendar', 'WorkTaskManager', 'MemoryWorkTaskRepository', 'IndexedDbWorkTaskRepository', 'SqlWorkTaskRepository', 'WorkTaskPersistence']) {
+for (const name of ['AccountingCalendarAdapter', 'BusinessDayCalculator', 'BigWorkCalendar', 'WorkTaskManager', 'MemoryWorkTaskRepository', 'IndexedDbWorkTaskRepository', 'SqlWorkTaskRepository', 'WorkTaskPersistence', 'WorkTaskBackup']) {
   if (typeof esm[name] !== 'function') throw new Error(`ESM export missing: ${name}`);
 }
+if (esm.WORK_TASK_BACKUP_SCHEMA_VERSION !== 1) throw new Error('Backup schema export mismatch.');
 const manager = new esm.WorkTaskManager();
 manager.add({ id: 'smoke', date: '1405/06/11', title: 'Smoke task' });
 if (manager.getByDate('1405/06/11').length !== 1) throw new Error('WorkTaskManager smoke failed.');
+const backup = esm.WorkTaskBackup.create(manager, { source: 'smoke' }, new Date('2026-09-03T12:00:00.000Z'));
+if (esm.WorkTaskBackup.parse(esm.WorkTaskBackup.stringify(backup)).taskCount !== 1) throw new Error('WorkTaskBackup smoke failed.');
 
 const require = createRequire(import.meta.url);
 const cjs = require(`${process.cwd()}/dist/index.js`);
 if (cjs.JalaliConverter.isLeapYear(1360) !== false) throw new Error('CommonJS leap-year smoke failed.');
 if (cjs.JalaliConverter.toGregorianISO({ year: 1405, month: 6, day: 11 }) !== '2026-09-02') throw new Error('CommonJS conversion smoke failed.');
-if (typeof cjs.BigWorkCalendar !== 'function' || typeof cjs.WorkTaskPersistence !== 'function') throw new Error('CommonJS work calendar exports are incomplete.');
+if (typeof cjs.BigWorkCalendar !== 'function' || typeof cjs.WorkTaskPersistence !== 'function' || typeof cjs.WorkTaskBackup !== 'function') throw new Error('CommonJS work calendar exports are incomplete.');
 
-console.log(`Package smoke test passed: ${requiredFiles.length} files, ${requiredExports.length} exports, work calendar, ESM and CommonJS verified.`);
+console.log(`Package smoke test passed: ${requiredFiles.length} files, ${requiredExports.length} exports, work calendar, backup, ESM and CommonJS verified.`);
