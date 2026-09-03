@@ -20,6 +20,7 @@ const requiredFiles = [
   'demo/sales.html',
   'demo/accounting.html',
   'demo/production.html',
+  'demo/work-calendar.html',
   'demo/shared.css',
   'docs/API_FA.md',
 ];
@@ -32,14 +33,10 @@ for (const name of requiredExports) {
   if (!packageJson.exports?.[name]) throw new Error(`package export missing: ${name}`);
 }
 
-if (packageJson.exports['.']?.import !== './dist/esm/index.mjs') {
-  throw new Error('ESM root export is not configured correctly.');
-}
-if (packageJson.exports['.']?.require !== './dist/index.js') {
-  throw new Error('CommonJS root export is not configured correctly.');
-}
+if (packageJson.exports['.']?.import !== './dist/esm/index.mjs') throw new Error('ESM root export is not configured correctly.');
+if (packageJson.exports['.']?.require !== './dist/index.js') throw new Error('CommonJS root export is not configured correctly.');
 
-for (const demo of ['crm.html', 'sales.html', 'accounting.html', 'production.html']) {
+for (const demo of ['crm.html', 'sales.html', 'accounting.html', 'production.html', 'work-calendar.html']) {
   const html = await readFile(`demo/${demo}`, 'utf8');
   if (!html.includes('../dist/browser/webtanan-jalali.js')) throw new Error(`${demo} does not reference browser bundle`);
   if (!html.includes('../dist/browser/webtanan-jalali.css')) throw new Error(`${demo} does not reference calendar CSS`);
@@ -51,18 +48,18 @@ if (!browserBundle.includes('WebtananJalali')) throw new Error('Browser global W
 const esm = await import(pathToFileURL(`${process.cwd()}/dist/esm/index.mjs`).href);
 if (esm.JalaliConverter.isLeapYear(1360) !== false) throw new Error('ESM JalaliConverter leap-year smoke failed.');
 if (esm.JalaliConverter.isLeapYear(1358) !== true) throw new Error('ESM leap-year historical smoke failed.');
-if (esm.JalaliConverter.toGregorianISO({ year: 1405, month: 6, day: 11 }) !== '2026-09-02') {
-  throw new Error('ESM conversion smoke failed.');
+if (esm.JalaliConverter.toGregorianISO({ year: 1405, month: 6, day: 11 }) !== '2026-09-02') throw new Error('ESM conversion smoke failed.');
+for (const name of ['AccountingCalendarAdapter', 'BusinessDayCalculator', 'BigWorkCalendar', 'WorkTaskManager', 'MemoryWorkTaskRepository', 'IndexedDbWorkTaskRepository', 'SqlWorkTaskRepository', 'WorkTaskPersistence']) {
+  if (typeof esm[name] !== 'function') throw new Error(`ESM export missing: ${name}`);
 }
-if (typeof esm.AccountingCalendarAdapter !== 'function' || typeof esm.BusinessDayCalculator !== 'function') {
-  throw new Error('ESM enterprise exports are incomplete.');
-}
+const manager = new esm.WorkTaskManager();
+manager.add({ id: 'smoke', date: '1405/06/11', title: 'Smoke task' });
+if (manager.getByDate('1405/06/11').length !== 1) throw new Error('WorkTaskManager smoke failed.');
 
 const require = createRequire(import.meta.url);
 const cjs = require(`${process.cwd()}/dist/index.js`);
 if (cjs.JalaliConverter.isLeapYear(1360) !== false) throw new Error('CommonJS leap-year smoke failed.');
-if (cjs.JalaliConverter.toGregorianISO({ year: 1405, month: 6, day: 11 }) !== '2026-09-02') {
-  throw new Error('CommonJS conversion smoke failed.');
-}
+if (cjs.JalaliConverter.toGregorianISO({ year: 1405, month: 6, day: 11 }) !== '2026-09-02') throw new Error('CommonJS conversion smoke failed.');
+if (typeof cjs.BigWorkCalendar !== 'function' || typeof cjs.WorkTaskPersistence !== 'function') throw new Error('CommonJS work calendar exports are incomplete.');
 
-console.log(`Package smoke test passed: ${requiredFiles.length} files, ${requiredExports.length} exports, ESM and CommonJS verified.`);
+console.log(`Package smoke test passed: ${requiredFiles.length} files, ${requiredExports.length} exports, work calendar, ESM and CommonJS verified.`);
