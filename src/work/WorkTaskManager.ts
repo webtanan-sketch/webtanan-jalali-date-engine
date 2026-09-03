@@ -16,11 +16,46 @@ export class WorkTaskManager {
     const task = createWorkTask(input);
     if (this.tasks.has(task.id)) throw new Error(`کار با شناسه ${task.id} قبلاً ثبت شده است.`);
     this.tasks.set(task.id, task);
-    return { ...task, tags: [...task.tags] };
+    return this.clone(task);
   }
 
   addMany(inputs: WorkTaskInput[]): WorkTaskRecord[] {
     return inputs.map((input) => this.add(input));
+  }
+
+  importRecords(records: WorkTaskRecord[], replace = true): WorkTaskRecord[] {
+    if (replace) this.tasks.clear();
+    const imported: WorkTaskRecord[] = [];
+    for (const record of records) {
+      const validated = createWorkTask({
+        id: record.id,
+        date: record.dateJalali,
+        title: record.title,
+        time: record.time,
+        endTime: record.endTime,
+        status: record.status,
+        priority: record.priority,
+        category: record.category,
+        assignee: record.assignee,
+        description: record.description,
+        color: record.color,
+        tags: record.tags,
+        createdBy: record.createdBy,
+      });
+      const normalized: WorkTaskRecord = {
+        ...record,
+        id: validated.id,
+        dateJalali: validated.dateJalali,
+        dateGregorian: validated.dateGregorian,
+        title: validated.title,
+        time: validated.time,
+        endTime: validated.endTime,
+        tags: [...validated.tags],
+      };
+      this.tasks.set(normalized.id, normalized);
+      imported.push(this.clone(normalized));
+    }
+    return imported;
   }
 
   update(id: string, patch: Partial<WorkTaskInput>): WorkTaskRecord {
@@ -28,7 +63,7 @@ export class WorkTaskManager {
     if (!current) throw new Error('کار موردنظر پیدا نشد.');
     const next = updateWorkTask(current, patch);
     this.tasks.set(id, next);
-    return { ...next, tags: [...next.tags] };
+    return this.clone(next);
   }
 
   toggleDone(id: string): WorkTaskRecord {
@@ -43,7 +78,7 @@ export class WorkTaskManager {
 
   get(id: string): WorkTaskRecord | null {
     const task = this.tasks.get(id);
-    return task ? { ...task, tags: [...task.tags] } : null;
+    return task ? this.clone(task) : null;
   }
 
   getByDate(date: string): WorkTaskRecord[] {
@@ -70,7 +105,7 @@ export class WorkTaskManager {
         if (byTime !== 0) return byTime;
         return a.createdAt.localeCompare(b.createdAt);
       })
-      .map((task) => ({ ...task, tags: [...task.tags] }));
+      .map((task) => this.clone(task));
   }
 
   getOverdue(today: string): WorkTaskRecord[] {
@@ -87,5 +122,9 @@ export class WorkTaskManager {
 
   toJSON(): WorkTaskRecord[] {
     return this.query();
+  }
+
+  private clone(task: WorkTaskRecord): WorkTaskRecord {
+    return { ...task, tags: [...task.tags] };
   }
 }
