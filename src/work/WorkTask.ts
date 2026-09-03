@@ -64,9 +64,13 @@ const makeId = (): string => {
   return `task_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
 
+const jalaliValueFromNormalized = (value: string): { year: number; month: number; day: number } => {
+  const [year, month, day] = value.split('/').map(Number);
+  return { year, month, day };
+};
+
 export function createWorkTask(input: WorkTaskInput, now = new Date()): WorkTaskRecord {
   const dateJalali = normalizeDate(input.date);
-  const parsed = JalaliConverter.parse(dateJalali);
   const title = input.title.trim();
   if (!title) throw new RangeError('عنوان کار نمی‌تواند خالی باشد.');
 
@@ -78,7 +82,7 @@ export function createWorkTask(input: WorkTaskInput, now = new Date()): WorkTask
   return {
     id: input.id?.trim() || makeId(),
     dateJalali,
-    dateGregorian: JalaliConverter.toGregorianISO(parsed),
+    dateGregorian: JalaliConverter.toGregorianISO(jalaliValueFromNormalized(dateJalali)),
     title,
     time,
     endTime,
