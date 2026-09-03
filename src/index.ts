@@ -77,6 +77,11 @@ export type {
   WebtananCustomThemeVariables,
 } from './theme/ThemeManager';
 
+export { createWorkTask, updateWorkTask } from './work/WorkTask';
+export type { WorkTaskStatus, WorkTaskPriority, WorkTaskInput, WorkTaskRecord } from './work/WorkTask';
+export { WorkTaskManager } from './work/WorkTaskManager';
+export type { WorkTaskQuery } from './work/WorkTaskManager';
+
 export { PersianDigits, toPersianDigits, toEnglishDigits } from './utils/PersianDigits';
 export { DateValidator } from './utils/DateValidator';
 
@@ -87,5 +92,7 @@ export type {
   WebtananDateRange,
   WebtananDatePickerState,
 } from './ui/WebtananDatePicker';
+export { BigWorkCalendar } from './ui/BigWorkCalendar';
+export type { BigWorkCalendarOptions, BigWorkCalendarDayDetail } from './ui/BigWorkCalendar';
 
 export { WebtananJalaliDatePickerElement, defineWebtananJalaliDatePicker } from './web-component/WebtananJalaliDatePickerElement';
