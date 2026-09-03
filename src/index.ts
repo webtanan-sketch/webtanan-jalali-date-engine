@@ -56,6 +56,7 @@ export { WorkflowTimeline } from './enterprise/WorkflowTimeline';
 export { CRMAdapter } from './integrations/CRMAdapter';
 export type { CRMCustomerEvent, CRMCustomerRecord } from './integrations/CRMAdapter';
 export { CalendarEventBridge } from './integrations/CalendarEventBridge';
+export type { CalendarBridgeEvent } from './integrations/CalendarEventBridge';
 export { SalesWorkflowAdapter } from './integrations/SalesWorkflowAdapter';
 export type {
   SalesStage,
