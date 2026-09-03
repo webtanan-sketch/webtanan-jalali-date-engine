@@ -1,6 +1,6 @@
 {
   "name": "webtanan-jalali-date-engine",
-  "version": "0.21.0",
+  "version": "1.0.0-rc.1",
   "description": "موتور تاریخ شمسی حرفه‌ای با DatePicker، تقویم بزرگ کاری، تعطیلات، Task، SQLite، MySQL، React، Vue، Electron و Laravel",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.mjs",
@@ -49,7 +49,7 @@
     "validation", "accessibility", "keyboard-navigation", "date-range", "multiple-dates", "disabled-dates",
     "themes", "dark-theme", "industrial-ui", "leap-year", "browser-bundle", "audit", "workflow", "business-day",
     "accounting-calendar", "crm", "production-planning", "esm", "commonjs", "selector-policy", "work-calendar",
-    "task-calendar", "indexeddb", "sqlite", "mysql"
+    "task-calendar", "indexeddb", "sqlite", "mysql", "backup", "enterprise-calendar"
   ],
   "peerDependencies": {
     "react": ">=18 <20",
