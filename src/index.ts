@@ -79,6 +79,8 @@ export type { BetterSqlite3DatabaseLike, BetterSqlite3StatementLike } from './st
 export { Mysql2Executor } from './storage/sql/Mysql2Executor';
 export type { Mysql2ConnectionLike } from './storage/sql/Mysql2Executor';
 export { WorkTaskPersistence } from './storage/WorkTaskPersistence';
+export { WorkTaskBackup, WORK_TASK_BACKUP_SCHEMA_VERSION } from './storage/WorkTaskBackup';
+export type { WorkTaskBackupEnvelope, RestoreWorkTaskBackupOptions } from './storage/WorkTaskBackup';
 
 export { ThemeManager, WEBTANAN_THEME_PRESETS, WEBTANAN_THEME_VARIABLES } from './theme/ThemeManager';
 export type {
