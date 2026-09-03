@@ -1,86 +1,126 @@
 # Webtanan Jalali Date Engine
 
-## موتور حرفه‌ای تاریخ شمسی برای نرم‌افزارهای ایرانی
+## موتور تاریخ شمسی حرفه‌ای برای نرم‌افزارهای ایرانی
 
-**Webtanan Jalali Date Engine** یک کتابخانه چندسکویی برای مدیریت تاریخ جلالی، انتخاب تاریخ، بازه زمانی، رویداد، تعطیلات و گردش‌های کاری سازمانی است.
+**Webtanan Jalali Date Engine** یک موتور چندسکویی تاریخ و زمان جلالی برای نرم‌افزارهای **CRM، فروش، حسابداری، سفارش، تولید، برنامه‌ریزی، گزارش‌گیری و سامانه‌های مدیریتی** است.
 
-این پروژه فقط یک Date Picker ساده نیست؛ هدف آن فراهم‌کردن یک هسته قابل استفاده در نرم‌افزارهای **CRM، فروش، حسابداری، سفارش، تولید، برنامه‌ریزی، گزارش‌گیری و سامانه‌های مدیریتی** است.
+این پروژه فقط یک Date Picker نیست؛ هسته تبدیل تاریخ، سال کبیسه، تعطیلات، روز کاری، رویداد، Workflow، Persistence، Theme و Adapterهای JavaScript / TypeScript / React / Vue / Electron / PHP / Laravel را در یک معماری قابل توسعه ارائه می‌کند.
 
-> وضعیت فعلی پروژه: **v0.5.0 — نسخه توسعه سازمانی**
+> وضعیت توسعه: **v0.15.0 — Release Hardening پیش از v1.0**
 
 ---
 
-## ویژگی‌های اصلی
+## قابلیت‌های اصلی
 
-### هسته تاریخ شمسی
+### هسته جلالی
 
-- تبدیل واقعی شمسی به میلادی
-- تبدیل واقعی میلادی به شمسی
-- اعتبارسنجی تاریخ
-- تشخیص سال کبیسه
-- محاسبه تعداد روزهای ماه
-- خروجی استاندارد ISO
-- پشتیبانی از اعداد فارسی و انگلیسی
+- تبدیل واقعی شمسی ↔ میلادی
+- خروجی Gregorian ISO
+- اعتبارسنجی تاریخ شمسی و میلادی
+- پشتیبانی اعداد فارسی، عربی و لاتین
+- الگوریتم سال کبیسه مستقل از دیتاست تعطیلات
+- محدوده پشتیبانی فعلی: سال شمسی **۱ تا ۳۱۷۷**
+- محاسبه تعداد روز ماه و سال
+- اطلاعات کامل سال با `JalaliYearEngine`
 
-نمونه مرجع:
+نمونه:
 
-```text
-1405/01/01  →  2026-03-21
-2026-09-02  →  1405/06/11
+```ts
+JalaliConverter.isLeapYear(1360); // false
+JalaliConverter.isLeapYear(1358); // true
+getJalaliYearInfo(1360);
 ```
 
-### انتخاب تاریخ
+یعنی انتخاب سال قدیمی مثل **۱۳۶۰** نیز از خود الگوریتم محاسبه می‌شود و به لیست دستی سال‌ها وابسته نیست.
 
-- انتخاب تک تاریخ
-- انتخاب بازه تاریخ
-- انتخاب چند تاریخ
-- حداقل و حداکثر تاریخ مجاز
-- روزهای غیرفعال
-- جابه‌جایی ماه قبل و بعد
-- نمایش ماه و سال شمسی
+### Date Picker
 
-### رویدادها و تقویم سازمانی
+- Single Date
+- Range
+- Multiple Date
+- Date + Time
+- ساعت، دقیقه و ثانیه
+- گام زمانی قابل تنظیم، مثلاً ۱۵ دقیقه
+- Min / Max Date
+- Disabled Dates
+- روزهای بسته سازمانی
+- Keyboard Navigation
+- ARIA Accessibility
+- اعداد فارسی
+- RTL کامل
+- Web Component مستقل
 
-هر روز می‌تواند شامل اطلاعات کاری باشد:
+### Theme System
 
-- تماس مشتری
-- جلسه
-- پرداخت
-- پیگیری فروش
-- تحویل سفارش
-- برنامه تولید
-- تعطیلات رسمی
-- تعطیلات اختصاصی شرکت
+چهار Theme حرفه‌ای داخلی:
 
-### وضعیت روزها
+- **Industrial Light — صنعتی روشن**
+- **Navy Command — فرماندهی سرمه‌ای**
+- **Steel Neutral — فولادی خنثی**
+- **Graphite Dark — گرافیتی تیره**
 
-پشتیبانی از وضعیت‌های کاری:
+همچنین Theme سفارشی با CSS Variables قابل تعریف است.
 
-- آزاد
-- دارای کار
-- جلسه
-- تعطیل
-- بسته
+### تعطیلات ایران
+
+دیتاست رسمی داخلی فعلی:
+
+- سال **۱۴۰۴**
+- سال **۱۴۰۵**
+
+هر Dataset دارای metadata منبع و تاریخ بازبینی است. برای سال‌های بعد `HolidayDatasetLoader` وجود دارد تا دیتاست سالانه بدون تغییر هسته اضافه شود.
+
+تعطیلات شرکت و تعطیلی‌های سفارشی نیز مستقل قابل ثبت هستند.
+
+### Day Status و روز کاری
+
+وضعیت‌های روز:
+
+- `free` — آزاد
+- `work` — دارای کار
+- `meeting` — جلسه
+- `holiday` — تعطیل
+- `closed` — بسته
+
+`BusinessDayCalculator` می‌تواند:
+
+- روز کاری بعدی/قبلی را پیدا کند
+- N روز کاری اضافه یا کم کند
+- تعداد روزهای کاری یک بازه را حساب کند
+- جمعه، تعطیلات رسمی/شرکتی و روزهای بسته را لحاظ کند
+
+### Event & Audit
+
+رکوردهای سازمانی شامل:
+
+- تاریخ شمسی
+- معادل میلادی
+- زمان
+- کاربر ثبت‌کننده
+- `createdAt`
+- توضیحات
+
+### CRM
+
+- ثبت Follow-up
+- Timeline مشتری
+- رکورد Audit کامل
+- پیگیری‌های آینده
 
 ### گردش فروش
 
-مدل آماده برای مسیرهایی مانند:
-
 ```text
-ثبت سفارش
-   ↓
-تأیید
-   ↓
-تولید
-   ↓
-بارگیری
-   ↓
-تحویل
+ثبت سفارش → تأیید → تولید → بارگیری → تحویل
 ```
 
-### گردش تولید
+- وضعیت هر مرحله
+- تاریخ شمسی و میلادی
+- مسئول
+- درصد پیشرفت
+- مرحله جاری
+- تشخیص تأخیر
 
-پشتیبانی از مراحل:
+### گردش تولید
 
 - برنامه‌ریزی
 - تأمین مواد
@@ -90,342 +130,277 @@
 - بارگیری
 - تحویل
 
-به همراه:
+به همراه مسئول مرحله، تاریخ، Audit metadata، درصد پیشرفت و کنترل موعد.
 
-- مسئول مرحله
-- تاریخ مرحله
-- توضیح
-- وضعیت
-- درصد پیشرفت
-- تشخیص تأخیر
+### تقویم حسابداری
+
+`AccountingCalendarAdapter` برای:
+
+- فاکتور
+- سررسید پرداخت
+- دریافت
+- حقوق
+- مالیات
+- بستن دوره
+
+به همراه گزارش سررسیدهای باز و جمع مبالغ.
+
+### Persistence و Backend
+
+- MemoryStorageAdapter
+- BrowserStorageAdapter
+- DatabaseStorageAdapter
+- RestStorageAdapter
+- JsonRepository
+- DatePickerPersistence
+- PDO Store در PHP
+- Laravel Cache Store
 
 ---
 
 # نصب
 
-## نصب مستقیم از GitHub برای JavaScript / TypeScript
+## JavaScript / TypeScript از GitHub
 
-تا قبل از انتشار رسمی در npm می‌توانید مستقیماً از GitHub نصب کنید:
+تا قبل از انتشار رسمی npm:
 
 ```bash
 npm install github:webtanan-sketch/webtanan-jalali-date-engine
 ```
 
-پس از انتشار در npm:
+بعد از انتشار رسمی npm:
 
 ```bash
 npm install webtanan-jalali-date-engine
 ```
 
-### استفاده
-
-```ts
-import {
-  JalaliConverter,
-  WebtananDatePicker,
-  EventEngine,
-  SalesWorkflowAdapter,
-  ProductionWorkflowAdapter
-} from 'webtanan-jalali-date-engine';
-```
-
-نمونه تبدیل تاریخ:
-
-```ts
-JalaliConverter.toGregorianISO({
-  year: 1405,
-  month: 1,
-  day: 1
-});
-
-// 2026-03-21
-```
-
----
-
-# نصب در Laravel
-
-## نصب مستقیم از GitHub با Composer
-
-در پروژه Laravel اجرا کنید:
+## PHP / Laravel از GitHub
 
 ```bash
 composer config repositories.webtanan-jalali vcs https://github.com/webtanan-sketch/webtanan-jalali-date-engine.git
 composer require webtanan/jalali-date-engine:dev-main
 ```
 
-پس از انتشار در Packagist فقط دستور زیر کافی خواهد بود:
+نصب ساده `composer require webtanan/jalali-date-engine` فقط بعد از انتشار رسمی Packagist قابل اتکا خواهد بود.
 
-```bash
-composer require webtanan/jalali-date-engine
+---
+
+# استفاده پایه
+
+```ts
+import {
+  JalaliConverter,
+  JalaliYearEngine,
+  WebtananDatePicker,
+  HolidayEngine,
+  BusinessDayCalculator,
+} from 'webtanan-jalali-date-engine';
+
+JalaliConverter.toGregorianISO({ year: 1405, month: 6, day: 11 });
+// 2026-09-02
+
+JalaliYearEngine.isLeap(1360);
+// false
 ```
 
-پکیج دارای Laravel Auto Discovery است و Service Provider به‌صورت خودکار شناسایی می‌شود.
+Date Picker:
 
-نمونه استفاده:
+```ts
+const picker = new WebtananDatePicker({
+  rtl: true,
+  persianDigits: true,
+  time: true,
+  minuteStep: 15,
+  theme: 'navy-command',
+});
 
-```php
-use Webtanan\JalaliDateEngine\JalaliDate;
-
-JalaliDate::toGregorianIso(1405, 1, 1);
-// 2026-03-21
-
-JalaliDate::toJalali(2026, 9, 2);
-// ['year' => 1405, 'month' => 6, 'day' => 11]
-```
-
-Facade لاراول نیز تعریف شده است:
-
-```php
-JalaliDate::format(1405, 6, 11);
+picker.setDate('1405/06/11');
+picker.setTime(14, 30);
+picker.open('#calendar');
 ```
 
 ---
 
 # React
 
-کتابخانه وابستگی اجباری به React ندارد و می‌تواند داخل هر کامپوننت React استفاده شود.
-
 ```tsx
-import { useEffect, useRef } from 'react';
-import { WebtananDatePicker } from 'webtanan-jalali-date-engine';
-import 'webtanan-jalali-date-engine/src/ui/webtanan-jalali.css';
+import { WebtananJalaliDatePickerReact } from 'webtanan-jalali-date-engine/react';
+import 'webtanan-jalali-date-engine/css';
 
-export function DateField() {
-  const host = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const picker = new WebtananDatePicker();
-    if (host.current) picker.open(host.current);
-    return () => picker.close();
-  }, []);
-
-  return <div ref={host} />;
-}
+<WebtananJalaliDatePickerReact
+  value="1405/06/11"
+  options={{ theme: 'industrial-light', time: true }}
+  onChange={(value) => console.log(value)}
+/>
 ```
 
----
+React یک Peer Dependency اختیاری است و هسته اصلی بدون React کار می‌کند.
 
-# Vue
+# Vue 3
 
 ```vue
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from 'vue';
-import { WebtananDatePicker } from 'webtanan-jalali-date-engine';
-import 'webtanan-jalali-date-engine/src/ui/webtanan-jalali.css';
+import { ref } from 'vue';
+import { WebtananJalaliDatePickerVue } from 'webtanan-jalali-date-engine/vue';
+import 'webtanan-jalali-date-engine/css';
 
-const host = ref<HTMLElement | null>(null);
-let picker: WebtananDatePicker | null = null;
-
-onMounted(() => {
-  picker = new WebtananDatePicker();
-  if (host.value) picker.open(host.value);
-});
-
-onBeforeUnmount(() => picker?.close());
+const value = ref('1405/06/11');
 </script>
 
 <template>
-  <div ref="host"></div>
+  <WebtananJalaliDatePickerVue v-model="value" />
 </template>
 ```
 
+Vue نیز Peer Dependency اختیاری است.
+
 ---
 
-# HTML / JavaScript
-
-پس از Build می‌توان فایل خروجی را در پروژه‌های HTML یا پنل‌های مدیریتی استفاده کرد.
+# Browser / HTML
 
 ```bash
 npm install
 npm run build
 ```
 
-خروجی TypeScript در پوشه زیر ساخته می‌شود:
+خروجی‌ها:
 
 ```text
-dist/
+dist/browser/webtanan-jalali.js
+dist/browser/webtanan-jalali.min.js
+dist/browser/webtanan-jalali.css
+```
+
+Global مرورگر:
+
+```js
+window.WebtananJalali
+```
+
+Web Component نیز در Browser Bundle به‌صورت خودکار ثبت می‌شود:
+
+```html
+<webtanan-jalali-date-picker
+  value="1405/06/11"
+  theme="graphite-dark"
+></webtanan-jalali-date-picker>
 ```
 
 ---
 
-# Electron و نرم‌افزارهای دسکتاپ
+# Laravel
 
-هسته پروژه وابستگی اجباری به مرورگر ندارد. بخش‌های تبدیل تاریخ، رویداد، گردش فروش و تولید می‌توانند مستقیماً در Electron یا سایر محیط‌های JavaScript استفاده شوند.
+هسته PHP شامل:
 
-رابط گرافیکی Date Picker در Renderer Process قابل استفاده است.
+- JalaliDate
+- JalaliValidator
+- Laravel Validation Rule
+- Facade
+- Service Provider
+- Blade View
+- Laravel Cache Store
+- PDO Store
 
----
+نمونه:
 
-# API اصلی
+```php
+use Webtanan\JalaliDateEngine\JalaliDate;
 
-## Date Picker
+JalaliDate::toGregorianIso(1405, 6, 11);
+// 2026-09-02
 
-```ts
-const picker = new WebtananDatePicker({
-  rtl: true,
-  persianDigits: true,
-  time: false,
-  range: true,
-  events: true,
-  holidays: true,
-  minuteStep: 15
-});
-
-picker.open();
-picker.close();
-picker.setDate('1405/06/11');
-picker.getDate();
-picker.setRange('1405/06/01', '1405/06/20');
-picker.getRange();
-picker.addEvent({
-  date: '1405/06/11',
-  title: 'جلسه فروش'
-});
-picker.clear();
-```
-
-## تبدیل تاریخ
-
-```ts
-JalaliConverter.toGregorian({ year: 1405, month: 6, day: 11 });
-JalaliConverter.toGregorianISO({ year: 1405, month: 6, day: 11 });
-JalaliConverter.toJalali({ year: 2026, month: 9, day: 2 });
-JalaliConverter.isLeapYear(1404);
-JalaliConverter.daysInMonth(1405, 12);
+JalaliDate::isLeapYear(1360);
+// false
 ```
 
 ---
 
-# ساختار پروژه
+# Demoهای واقعی
+
+بعد از `npm run build` فایل‌های زیر را از طریق یک HTTP server محلی باز کنید:
 
 ```text
-webtanan-jalali-date-engine/
-├── src/
-│   ├── core/
-│   ├── calendar/
-│   ├── enterprise/
-│   ├── integrations/
-│   ├── ui/
-│   └── utils/
-├── php/
-│   ├── src/
-│   │   └── Laravel/
-│   └── tests/
-├── tests/
-├── demo/
-├── docs/
-├── composer.json
-├── package.json
-├── tsconfig.json
-├── tsconfig.build.json
-└── .github/workflows/ci.yml
+demo/index.html        Theme / Leap Year / Holidays Lab
+demo/crm.html          CRM Follow-up
+demo/sales.html        Sales Workflow
+demo/accounting.html   Accounting + Business Day
+demo/production.html   Production Workflow
 ```
 
 ---
 
 # تست و کنترل کیفیت
 
-تست‌ها در هر Push به شاخه `main` توسط GitHub Actions اجرا می‌شوند.
-
-### JavaScript / TypeScript
-
-```bash
-npm install
-npm run typecheck
-npm test
-npm run build
-```
-
-یا همه مراحل:
-
 ```bash
 npm run test:ci
 ```
 
-### PHP
+این دستور شامل:
+
+1. TypeScript Typecheck
+2. Jest Test Suite
+3. TypeScript Build
+4. Browser + Minified Build
+5. Package Smoke Test
+
+PHP:
 
 ```bash
 php php/tests/run.php
 ```
 
-CI شامل موارد زیر است:
-
-- TypeScript typecheck
-- Jest tests
-- Build
-- Composer validation
-- PHP syntax validation
-- PHP conversion tests
+CI روی هر Push به `main` اجرا می‌شود.
 
 ---
 
-# نسخه‌ها
+# مستندات
 
-## v0.1.0 — پایه معماری
-
-- ساخت ریپازیتوری
-- معماری اولیه
-- تعریف API و ساختار داده
-
-## v0.2.0 — هسته تاریخ
-
-- هسته TypeScript
-- هسته PHP
-- ساختار تبدیل تاریخ
-- ابزار اعداد فارسی
-
-## v0.3.0 — تقویم تعاملی
-
-- Calendar Renderer
-- انتخاب تاریخ
-- بازه تاریخ
-- چند تاریخ
-- رابط RTL
-
-## v0.4.0 — لایه سازمانی
-
-- رویدادها
-- وضعیت روزها
-- تعطیلات
-- CRM Adapter
-- Sales Workflow
-- Production Workflow
-
-## v0.5.0 — نسخه توسعه سازمانی
-
-- تبدیل واقعی شمسی ↔ میلادی
-- خروجی ISO
-- رابط WebtananDatePicker
-- حذف کامل نام قدیمی GFT از API جدید
-- Composer / Laravel Auto Discovery
-- Facade و Service Provider
-- npm build و Jest
-- GitHub Actions CI
-- تست TypeScript و PHP
-- مستندات نصب Laravel، React، Vue و Electron
-
-## مسیر بعدی
-
-نسخه‌های بعدی روی موارد زیر تمرکز خواهند داشت:
-
-- Time Picker کامل
-- تعطیلات رسمی ایران به‌صورت دیتاست نسخه‌بندی‌شده
-- Blade Component لاراول
-- Web Component مستقل
-- قالب‌های آماده CRM / فروش / حسابداری / تولید
-- گزارش‌گیری و Persistence Adapter
-- Accessibility کامل
-- Performance Benchmark
+- `docs/API_FA.md` — API کامل فارسی
+- `docs/INSTALLATION_FA.md` — نصب
+- `docs/LARAVEL_FA.md` — Laravel
+- `docs/FRAMEWORKS_FA.md` — React / Vue / Electron
+- `docs/HOLIDAYS_FA.md` — سیاست دیتاست تعطیلات
+- `docs/THEMES_FA.md` — Theme System
+- `docs/VERSIONS_FA.md` — تاریخچه نسخه‌ها
 
 ---
 
-# مجوز
+# ساختار اصلی پروژه
 
-مجوز فعلی پروژه: **MIT**
+```text
+src/
+├── core/
+├── calendar/
+├── accessibility/
+├── enterprise/
+├── enterprise/holidays/
+├── framework/
+├── integrations/
+├── storage/
+├── theme/
+├── time/
+├── ui/
+└── web-component/
+
+php/
+tests/
+demo/
+docs/
+scripts/
+```
 
 ---
 
-**توسعه داده شده توسط Webtanan**
+# مسیر انتشار
 
-کتابخانه‌های حرفه‌ای برای نرم‌افزارهای فارسی و سازمانی.
+پروژه اکنون در مرحله **Release Hardening پیش از v1.0.0** است. قبل از v1.0 قرارداد API، Package Exports، Demoها، Smoke Test و مستندات نهایی تثبیت می‌شوند.
+
+انتشار در npm یا Packagist فقط زمانی در مستندات به‌عنوان نصب مستقیم اعلام می‌شود که انتشار واقعی انجام شده باشد.
+
+---
+
+## مجوز
+
+MIT
+
+**Webtanan — ابزارهای حرفه‌ای برای نرم‌افزارهای فارسی و سازمانی**
