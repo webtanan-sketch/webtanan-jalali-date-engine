@@ -98,17 +98,55 @@
 - metadata منبع، URL و تاریخ بازبینی برای هر Dataset
 - source مستقل `annual-dataset`
 - fallback به تعطیلات ثابت برای سال‌های فاقد دیتاست داخلی
-- تست مجدد سال کبیسه: ۱۴۰۳ کبیسه، ۱۴۰۴ و ۱۴۰۵ عادی
 
-## برنامه مسیر بعد
-### v0.11.x
-- Theme selector آماده برای Demoها
-- امکان Theme سفارشی از طریق CSS Variables
-- Dataset loader خارجی برای سال‌های بعد
-- بهبود Roving Tabindex و Focus Management
+## v0.11.0 — General Leap-Year Engine & Browser Build
+- `JalaliYearEngine` و `getJalaliYearInfo`
+- تشخیص کبیسه الگوریتمی برای تمام سال‌های ۱ تا ۳۱۷۷، از جمله سال‌های قدیمی مانند ۱۳۶۰
+- تست سراسری تعداد روز اسفند و سال برای کل محدوده پشتیبانی‌شده
+- Theme سفارشی با CSS Variables
+- HolidayDatasetLoader برای دیتاست‌های سالانه آینده
+- حذف هسته‌های قدیمی ناسازگار
+- Browser Bundle و نسخه Minified با esbuild
+- Demo آزمایشگاهی Theme / Leap Year / Holidays
+- ۲۲ Test Suite و ۸۸ تست موفق در checkpoint پایدار v0.11
 
-### v1.0.0
-- API پایدار
-- مستندات کامل
-- Demoهای CRM، فروش، حسابداری و تولید
-- Release و بسته‌های انتشار رسمی
+## v0.12.0 — React & Vue Adapters
+- Codec مشترک برای Single / Range / Multiple / DateTime
+- React Component رسمی از مسیر `webtanan-jalali-date-engine/react`
+- Vue 3 Component رسمی از مسیر `webtanan-jalali-date-engine/vue`
+- React و Vue به‌صورت Peer Dependency اختیاری؛ بدون سنگین‌کردن هسته اصلی
+- مستند نصب و استفاده واقعی فریم‌ورک‌ها
+- ۲۳ Test Suite و ۹۴ تست موفق در checkpoint پایدار v0.12
+
+## v0.13.0 — Audit & Enterprise Records
+- EventEngine با شناسه یکتا، اعتبارسنجی تاریخ/زمان، معادل میلادی و `createdAt`
+- CRM Record کامل با API سازگار با Timeline قدیمی
+- DateValidator رشته‌ای با پشتیبانی اعداد فارسی/عربی
+- Sales Workflow با تاریخ میلادی، Audit metadata، مرحله جاری و تأخیر
+- Production Workflow با تاریخ‌های معتبر، معادل میلادی، مسئول مرحله و گزارش مدیریتی
+- حذف `any` از CalendarEventBridge و تبدیل آن به Generic Type-safe API
+- انتشار Typeهای سازمانی در API عمومی
+
+## v0.14.0 / v0.14.1 — Business Day, Accounting & Day Status
+- BusinessDayCalculator با جمعه، تعطیلات رسمی/شرکتی و روزهای بسته
+- محاسبه روز کاری بعد/قبل، افزودن N روز کاری و شمارش بازه
+- AccountingCalendarAdapter برای فاکتور، سررسید، دریافت، حقوق، مالیات و بستن دوره
+- گزارش سررسیدهای باز و جمع مبالغ
+- ارتقای DayStatusEngine با تاریخ معتبر، Bulk API، metadata، فیلتر و خروجی JSON
+- اتصال مستقیم این لایه‌ها به تعطیلات رسمی ۱۴۰۴ و ۱۴۰۵
+
+## v0.15.0 — API Documentation & Real Demos
+- مستند کامل فارسی `docs/API_FA.md`
+- Demo واقعی CRM با Theme سرمه‌ای
+- Demo واقعی فروش با Theme صنعتی روشن
+- Demo واقعی حسابداری با Theme فولادی و Business Day
+- Demo واقعی تولید با Theme گرافیتی تیره
+- تمام Demoها از Browser Bundle واقعی `dist/browser` استفاده می‌کنند
+
+## مسیر تا v1.0.0
+- Release hardening و بررسی API عمومی
+- تست Smoke برای بسته npm و Subpathهای React/Vue/CSS
+- بهبود Demo index و راهنمای اجرای Demoها
+- تکمیل README با همه قابلیت‌های جدید
+- بررسی Migration و قرارداد SemVer
+- ساخت Release candidate و سپس v1.0.0
