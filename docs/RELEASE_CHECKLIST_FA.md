@@ -24,7 +24,7 @@
 - [x] وضعیت و اولویت Task
 - [x] مسئول، دسته‌بندی، ساعت و Tag
 - [x] Audit metadata
-- [x] Stress Test هزاران Task
+- [x] Stress Test با 5000 Task
 
 ## تعطیلات
 - [x] دیتاست 1404
@@ -75,8 +75,8 @@
 - [x] راهنمای Laravel
 
 ## کنترل نهایی v1
-- [ ] CI نهایی RC سبز
-- [ ] Version = 1.0.0
+- [x] CI Release Candidate سبز — 35 Suite / 180 تست
+- [x] Version = 1.0.0
 - [ ] README نهایی
 - [ ] تصاویر Repository
 - [ ] CI نهایی Stable سبز
