@@ -29,6 +29,11 @@ export type {
   HolidaySource,
   HolidayType,
 } from './enterprise/HolidayEngine';
+export { BusinessDayCalculator } from './enterprise/BusinessDayCalculator';
+export type {
+  GregorianWeekday,
+  BusinessDayCalculatorOptions,
+} from './enterprise/BusinessDayCalculator';
 export { IranHolidayProvider, IRAN_FIXED_SOLAR_HOLIDAYS } from './enterprise/holidays/IranHolidayProvider';
 export type {
   IranHolidayProviderOptions,
@@ -57,6 +62,13 @@ export { CRMAdapter } from './integrations/CRMAdapter';
 export type { CRMCustomerEvent, CRMCustomerRecord } from './integrations/CRMAdapter';
 export { CalendarEventBridge } from './integrations/CalendarEventBridge';
 export type { CalendarBridgeEvent } from './integrations/CalendarEventBridge';
+export { AccountingCalendarAdapter } from './integrations/AccountingCalendarAdapter';
+export type {
+  AccountingEntryType,
+  AccountingEntryStatus,
+  AccountingCalendarEntry,
+  AccountingCalendarRecord,
+} from './integrations/AccountingCalendarAdapter';
 export { SalesWorkflowAdapter } from './integrations/SalesWorkflowAdapter';
 export type {
   SalesStage,
