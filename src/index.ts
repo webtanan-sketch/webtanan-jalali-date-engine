@@ -68,6 +68,16 @@ export type { FetchLike, FetchResponseLike, RestStorageAdapterOptions } from './
 export { JsonRepository } from './storage/JsonRepository';
 export type { StoredEnvelope, JsonRepositoryOptions } from './storage/JsonRepository';
 export { DatePickerPersistence } from './storage/DatePickerPersistence';
+export type { WorkTaskRepository, WorkTaskRepositoryQuery } from './storage/WorkTaskRepository';
+export { MemoryWorkTaskRepository } from './storage/MemoryWorkTaskRepository';
+export { IndexedDbWorkTaskRepository } from './storage/IndexedDbWorkTaskRepository';
+export type { IndexedDbWorkTaskRepositoryOptions } from './storage/IndexedDbWorkTaskRepository';
+export { SqlWorkTaskRepository } from './storage/SqlWorkTaskRepository';
+export type { SqlDialect, SqlQueryResult, SqlExecutor, SqlWorkTaskRepositoryOptions } from './storage/SqlWorkTaskRepository';
+export { BetterSqlite3Executor } from './storage/sql/BetterSqlite3Executor';
+export type { BetterSqlite3DatabaseLike, BetterSqlite3StatementLike } from './storage/sql/BetterSqlite3Executor';
+export { Mysql2Executor } from './storage/sql/Mysql2Executor';
+export type { Mysql2ConnectionLike } from './storage/sql/Mysql2Executor';
 
 export { ThemeManager, WEBTANAN_THEME_PRESETS, WEBTANAN_THEME_VARIABLES } from './theme/ThemeManager';
 export type {
