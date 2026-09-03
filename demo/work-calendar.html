@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Webtanan Big Work Calendar</title>
+  <link rel="stylesheet" href="../dist/browser/webtanan-jalali.css">
+  <style>
+    :root{font-family:Tahoma,Arial,sans-serif;background:#eef2f6;color:#172033}*{box-sizing:border-box}body{margin:0}
+    main{width:min(1500px,100%);margin:auto;padding:20px}.toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap}
+    .toolbar h1{font-size:21px;margin:0}.toolbar p{margin:4px 0 0;color:#667085;font-size:12px}.actions{display:flex;gap:8px;flex-wrap:wrap}
+    button,select,input{font:inherit}.action{height:38px;border:0;border-radius:8px;padding:0 14px;background:#17365d;color:#fff;font-weight:800;cursor:pointer}
+    .secondary{background:#fff;color:#17365d;border:1px solid #cbd5e1}.scroll{overflow:auto;padding-bottom:8px}.day-panel{margin-top:16px;background:#fff;border:1px solid #d7dce3;border-radius:12px;padding:14px}
+    .day-panel h2{font-size:15px;margin:0 0 10px}.task-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #edf0f4}.task-row:last-child{border:0}.muted{color:#667085;font-size:11px}
+    @media(max-width:720px){main{padding:10px}}
+  </style>
+</head>
+<body>
+<main>
+  <div class="toolbar">
+    <div><h1>تقویم بزرگ کاری Webtanan</h1><p>نمای ماهانه مدیریتی با چند کار در هر روز، مسئول، ساعت، اولویت و وضعیت.</p></div>
+    <div class="actions">
+      <select id="theme" class="secondary"></select>
+      <button id="addTask" class="action">+ کار نمونه</button>
+      <button id="toggleFirst" class="action secondary">تغییر وضعیت اولین کار</button>
+    </div>
+  </div>
+  <div class="scroll"><div id="calendar"></div></div>
+  <section class="day-panel"><h2 id="dayTitle">جزئیات روز</h2><div id="dayTasks" class="muted">روی یک روز کلیک کنید.</div></section>
+</main>
+<script src="../dist/browser/webtanan-jalali.js"></script>
+<script>
+  const API=window.WebtananJalali;
+  if(!API) throw new Error('ابتدا npm run build را اجرا کنید.');
+  const manager=new API.WorkTaskManager();
+  manager.addMany([
+    {id:'t1',date:'1405/06/10',title:'تماس با مشتری پروژه آفتاب',time:'09:00',assignee:'رضا',priority:'high',category:'فروش'},
+    {id:'t2',date:'1405/06/10',title:'ارسال پیش‌فاکتور',time:'11:30',assignee:'نگار',priority:'normal',category:'فروش'},
+    {id:'t3',date:'1405/06/11',title:'جلسه برنامه تولید',time:'08:30',assignee:'علی',priority:'urgent',category:'تولید'},
+    {id:'t4',date:'1405/06/11',title:'کنترل موجودی مواد اولیه',time:'10:00',assignee:'انبار',priority:'normal',category:'تولید'},
+    {id:'t5',date:'1405/06/11',title:'پیگیری وصول مشتری',time:'14:00',assignee:'مالی',priority:'high',category:'حسابداری'},
+    {id:'t6',date:'1405/06/12',title:'تحویل سفارش شماره ۲۴۱',time:'12:30',assignee:'ارسال',status:'done',priority:'normal',category:'تحویل'},
+    {id:'t7',date:'1405/06/14',title:'جلسه هفتگی فروش',time:'09:30',assignee:'مدیر فروش',priority:'normal',category:'جلسه'},
+    {id:'t8',date:'1405/06/14',title:'ثبت قیمت‌های جدید',time:'11:00',assignee:'فروش',priority:'high',category:'فروش'},
+    {id:'t9',date:'1405/06/14',title:'بررسی مانده حساب',time:'13:00',assignee:'مالی',priority:'normal',category:'حسابداری'},
+    {id:'t10',date:'1405/06/14',title:'ارسال نمونه برای مشتری',time:'15:00',assignee:'انبار',priority:'normal',category:'فروش'},
+    {id:'t11',date:'1405/06/14',title:'تماس مجدد پروژه ویلا',time:'16:00',assignee:'رضا',priority:'urgent',category:'فروش'}
+  ]);
+  const calendar=new API.BigWorkCalendar(manager,{year:1405,month:6,theme:'navy-command',maxVisibleTasksPerDay:4});
+  const host=document.getElementById('calendar');calendar.open(host);
+  const theme=document.getElementById('theme');
+  API.ThemeManager.list().forEach(t=>{const o=document.createElement('option');o.value=t.name;o.textContent=t.titleFa;theme.appendChild(o)});theme.value='navy-command';
+  theme.addEventListener('change',()=>{const current=calendar.getCurrentMonth();calendar.close();const next=new API.BigWorkCalendar(manager,{...current,theme:theme.value,maxVisibleTasksPerDay:4});window.demoCalendar=next;next.open(host);bind(next)});
+  let active=calendar;window.demoCalendar=calendar;
+  function bind(instance){active=instance;host.addEventListener(API.BigWorkCalendar.dayEventName,onDay,{once:false})}
+  function onDay(event){const {date,tasks}=event.detail;document.getElementById('dayTitle').textContent=`کارهای ${date}`;const box=document.getElementById('dayTasks');box.replaceChildren();if(!tasks.length){box.textContent='کاری ثبت نشده است.';return}tasks.forEach(task=>{const row=document.createElement('div');row.className='task-row';const time=document.createElement('strong');time.textContent=task.time||'—';const title=document.createElement('div');title.innerHTML=`<strong>${task.title}</strong><div class="muted">${task.assignee||'بدون مسئول'} · ${task.category||'بدون دسته‌بندی'}</div>`;const status=document.createElement('span');status.textContent=task.status;row.append(time,title,status);box.append(row)})}
+  bind(calendar);
+  document.getElementById('addTask').addEventListener('click',()=>{const id='sample-'+Date.now();manager.add({id,date:'1405/06/15',title:'کار جدید نمونه',time:'10:15',assignee:'کاربر',priority:'high'});const current=active.getCurrentMonth();active.setMonth(current.year,current.month)});
+  document.getElementById('toggleFirst').addEventListener('click',()=>{const first=manager.query()[0];if(first){manager.toggleDone(first.id);const current=active.getCurrentMonth();active.setMonth(current.year,current.month)}});
+</script>
+</body>
+</html>
