@@ -1,7 +1,7 @@
 {
   "name": "webtanan-jalali-date-engine",
-  "version": "0.17.0",
-  "description": "موتور تاریخ شمسی حرفه‌ای برای JavaScript، TypeScript، React، Vue، Electron، Laravel و نرم‌افزارهای سازمانی",
+  "version": "0.21.0",
+  "description": "موتور تاریخ شمسی حرفه‌ای با DatePicker، تقویم بزرگ کاری، تعطیلات، Task، SQLite، MySQL، React، Vue، Electron و Laravel",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.mjs",
   "types": "./dist/index.d.ts",
@@ -43,7 +43,14 @@
     "test:package": "node scripts/package-smoke.mjs",
     "test:ci": "npm run typecheck && npm test && npm run build && npm run test:package"
   },
-  "keywords": ["jalali", "persian-calendar", "datepicker", "iran", "rtl", "react", "vue", "electron", "laravel", "holidays", "official-holidays", "holiday-dataset", "persistence", "web-component", "rest", "database", "validation", "accessibility", "keyboard-navigation", "date-range", "multiple-dates", "disabled-dates", "themes", "dark-theme", "industrial-ui", "leap-year", "browser-bundle", "audit", "workflow", "business-day", "accounting-calendar", "crm", "production-planning", "esm", "commonjs", "selector-policy"],
+  "keywords": [
+    "jalali", "persian-calendar", "datepicker", "iran", "rtl", "react", "vue", "electron", "laravel",
+    "holidays", "official-holidays", "holiday-dataset", "persistence", "web-component", "rest", "database",
+    "validation", "accessibility", "keyboard-navigation", "date-range", "multiple-dates", "disabled-dates",
+    "themes", "dark-theme", "industrial-ui", "leap-year", "browser-bundle", "audit", "workflow", "business-day",
+    "accounting-calendar", "crm", "production-planning", "esm", "commonjs", "selector-policy", "work-calendar",
+    "task-calendar", "indexeddb", "sqlite", "mysql"
+  ],
   "peerDependencies": {
     "react": ">=18 <20",
     "vue": ">=3.4 <4"
