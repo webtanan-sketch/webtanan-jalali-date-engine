@@ -57,7 +57,12 @@ export { CRMAdapter } from './integrations/CRMAdapter';
 export type { CRMCustomerEvent, CRMCustomerRecord } from './integrations/CRMAdapter';
 export { CalendarEventBridge } from './integrations/CalendarEventBridge';
 export { SalesWorkflowAdapter } from './integrations/SalesWorkflowAdapter';
-export type { SalesStage, SalesStep } from './integrations/SalesWorkflowAdapter';
+export type {
+  SalesStage,
+  SalesStepStatus,
+  SalesStep,
+  SalesStepRecord,
+} from './integrations/SalesWorkflowAdapter';
 export { ProductionWorkflowAdapter } from './integrations/ProductionWorkflowAdapter';
 export type {
   ProductionStageStatus,
